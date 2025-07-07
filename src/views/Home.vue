@@ -7,22 +7,8 @@
       <div class="text-center">
         <h1 class="text-4xl md:text-6xl font-bold mb-4">백성운수</h1>
         <p class="text-xl md:text-2xl mb-8 text-primary-100">
-          편리하고 안전한 대중교통 서비스
+          편리하고 안전한 안성시 대중교통
         </p>
-        <div class="flex flex-col md:flex-row gap-4 justify-center">
-          <router-link
-            to="/schedule"
-            class="btn btn-primary bg-white text-primary-600 hover:bg-gray-100 px-8 py-3 text-lg"
-          >
-            시간표 보기
-          </router-link>
-          <router-link
-            to="/ddock"
-            class="btn btn-outline border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 text-lg"
-          >
-            정류장 찾기
-          </router-link>
-        </div>
       </div>
     </section>
 

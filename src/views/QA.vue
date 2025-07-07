@@ -2,14 +2,26 @@
   <div class="qa">
     <!-- Page Header -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center"
+      >
         <div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2">Q&A</h1>
           <p class="text-gray-600">궁금한 점이나 건의사항을 문의해주세요</p>
         </div>
         <router-link to="/qa/form" class="btn btn-primary mt-4 md:mt-0">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4"
+            />
           </svg>
           문의하기
         </router-link>
@@ -20,7 +32,9 @@
     <div class="card p-6 mb-6">
       <div class="flex flex-col md:flex-row gap-4">
         <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 mb-2">검색</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >검색</label
+          >
           <div class="relative">
             <input
               v-model="searchQuery"
@@ -28,14 +42,26 @@
               placeholder="제목 또는 내용으로 검색..."
               class="form-input pl-10"
               @keyup.enter="search"
+            />
+            <svg
+              class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
         </div>
         <div class="w-full md:w-48">
-          <label class="block text-sm font-medium text-gray-700 mb-2">상태</label>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >상태</label
+          >
           <select v-model="selectedStatus" class="form-select">
             <option value="">전체</option>
             <option value="pending">답변대기</option>
@@ -44,14 +70,34 @@
         </div>
         <div class="flex items-end gap-2">
           <button @click="search" class="btn btn-primary">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            <svg
+              class="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             검색
           </button>
           <button @click="resetSearch" class="btn btn-outline">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            <svg
+              class="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
             초기화
           </button>
@@ -67,8 +113,8 @@
     <!-- QA List -->
     <div v-else>
       <div v-if="qas.length > 0" class="space-y-4">
-        <div 
-          v-for="qa in qas" 
+        <div
+          v-for="qa in qas"
           :key="qa.id"
           class="card p-6 hover:shadow-lg transition-shadow cursor-pointer"
           @click="goToDetail(qa.id)"
@@ -76,10 +122,12 @@
           <div class="flex justify-between items-start mb-4">
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
-                <h3 class="text-lg font-semibold text-gray-900 hover:text-primary-600">
+                <h3
+                  class="text-lg font-semibold text-gray-900 hover:text-primary-600"
+                >
                   {{ qa.title }}
                 </h3>
-                <span 
+                <span
                   class="px-2 py-1 text-xs font-medium rounded"
                   :class="getStatusClass(qa.status)"
                 >
@@ -91,39 +139,88 @@
               </p>
               <div class="flex items-center text-sm text-gray-500 gap-4">
                 <span class="flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                   {{ qa.author_name }}
                 </span>
                 <span class="flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   {{ formatDate(qa.created_at) }}
                 </span>
                 <span v-if="qa.file_name" class="flex items-center">
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                    />
                   </svg>
                   첨부파일
                 </span>
               </div>
             </div>
-            <button class="text-primary-600 hover:text-primary-700 text-sm font-medium ml-4">
+            <button
+              class="text-primary-600 hover:text-primary-700 text-sm font-medium ml-4"
+            >
               상세보기 →
             </button>
           </div>
-          
+
           <!-- Answer Preview -->
-          <div v-if="qa.answer && qa.answer.content" class="border-t border-gray-200 pt-4 mt-4">
+          <div
+            v-if="qa.answer && qa.answer.content"
+            class="border-t border-gray-200 pt-4 mt-4"
+          >
             <div class="bg-gray-50 rounded-lg p-4">
               <div class="flex items-center mb-2">
-                <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <svg
+                  class="w-5 h-5 text-green-600 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
-                <span class="text-sm font-medium text-gray-900">관리자 답변</span>
-                <span class="text-sm text-gray-500 ml-2">{{ formatDate(qa.answer.created_at) }}</span>
+                <span class="text-sm font-medium text-gray-900"
+                  >관리자 답변</span
+                >
+                <span class="text-sm text-gray-500 ml-2">{{
+                  formatDate(qa.answer.created_at)
+                }}</span>
               </div>
               <p class="text-gray-600 text-sm line-clamp-2">
                 {{ qa.answer.content.substring(0, 100) }}...
@@ -132,12 +229,24 @@
           </div>
         </div>
       </div>
-      
+
       <div v-else class="card p-12 text-center">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        <svg
+          class="w-16 h-16 text-gray-400 mx-auto mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">문의 내역이 없습니다</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          문의 내역이 없습니다
+        </h3>
         <p class="text-gray-600 mb-4">궁금한 점이나 건의사항을 문의해보세요.</p>
         <router-link to="/qa/form" class="btn btn-primary">
           문의하기
@@ -148,10 +257,13 @@
       <div v-if="qas.length > 0" class="mt-8">
         <div class="flex items-center justify-between">
           <div class="text-sm text-gray-700">
-            총 {{ pagination.total }}개 중 {{ ((pagination.page - 1) * pagination.limit) + 1 }}-{{ Math.min(pagination.page * pagination.limit, pagination.total) }}개 표시
+            총 {{ pagination.total }}개 중
+            {{ (pagination.page - 1) * pagination.total_pages + 1 }}-{{
+              Math.min(pagination.page * pagination.total_pages, pagination.total)
+            }}개 표시
           </div>
           <div class="pagination">
-            <button 
+            <button
               @click="changePage(pagination.page - 1)"
               :disabled="pagination.page <= 1"
               class="pagination-item"
@@ -164,15 +276,18 @@
               :key="page"
               @click="changePage(page)"
               class="pagination-item"
-              :class="{ 'active': page === pagination.page }"
+              :class="{ active: page === pagination.page }"
             >
               {{ page }}
             </button>
-            <button 
+            <button
               @click="changePage(pagination.page + 1)"
               :disabled="pagination.page >= pagination.totalPages"
               class="pagination-item"
-              :class="{ 'opacity-50 cursor-not-allowed': pagination.page >= pagination.totalPages }"
+              :class="{
+                'opacity-50 cursor-not-allowed':
+                  pagination.page >= pagination.totalPages,
+              }"
             >
               다음
             </button>
@@ -184,106 +299,112 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQAsStore } from '@/stores/qas'
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useQAsStore } from "@/stores/qas";
 
 export default {
-  name: 'QA',
+  name: "QA",
   setup() {
-    const router = useRouter()
-    const qasStore = useQAsStore()
-    
-    const searchQuery = ref('')
-    const selectedStatus = ref('')
+    const router = useRouter();
+    const qasStore = useQAsStore();
 
-    const isLoading = computed(() => qasStore.isLoading)
-    const qas = computed(() => qasStore.qas)
-    const pagination = computed(() => qasStore.pagination)
+    const searchQuery = ref("");
+    const selectedStatus = ref("");
+
+    const isLoading = computed(() => qasStore.isLoading);
+    const qas = computed(() => qasStore.qas);
+    const pagination = computed(() => qasStore.pagination);
 
     const visiblePages = computed(() => {
-      const current = pagination.value.page
-      const total = pagination.value.totalPages
-      const delta = 2
-      const range = []
-      
-      for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
-        range.push(i)
+      const current = pagination.value.page;
+      const total = pagination.value.totalPages;
+      const delta = 2;
+      const range = [];
+
+      for (
+        let i = Math.max(2, current - delta);
+        i <= Math.min(total - 1, current + delta);
+        i++
+      ) {
+        range.push(i);
       }
-      
+
       if (current - delta > 2) {
-        range.unshift('...')
+        range.unshift("...");
       }
       if (current + delta < total - 1) {
-        range.push('...')
+        range.push("...");
       }
-      
-      range.unshift(1)
+
+      range.unshift(1);
       if (total > 1) {
-        range.push(total)
+        range.push(total);
       }
-      
-      return range.filter((item, index, self) => self.indexOf(item) === index)
-    })
+
+      return range.filter((item, index, self) => self.indexOf(item) === index);
+    });
 
     const getStatusClass = (status) => {
-      return status === 'answered' 
-        ? 'bg-green-100 text-green-800' 
-        : 'bg-yellow-100 text-yellow-800'
-    }
+      return status === "answered"
+        ? "bg-green-100 text-green-800"
+        : "bg-yellow-100 text-yellow-800";
+    };
 
     const getStatusLabel = (status) => {
-      return status === 'answered' ? '답변완료' : '답변대기'
-    }
+      return status === "answered" ? "답변완료" : "답변대기";
+    };
 
     const formatDate = (dateString) => {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      })
-    }
+      const date = new Date(dateString);
+      return date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    };
 
     const search = async () => {
       const params = {
+        qa_type: "CUSTOMER",
         page: 1,
-        limit: 10
-      }
-      
-      if (searchQuery.value) params.search = searchQuery.value
-      if (selectedStatus.value) params.status = selectedStatus.value
-      
-      await qasStore.fetchQAs(params)
-    }
+        page_size: 10,
+      };
+
+      if (searchQuery.value) params.search = searchQuery.value;
+      if (selectedStatus.value) params.status = selectedStatus.value;
+
+      await qasStore.fetchQAs(params);
+    };
 
     const resetSearch = async () => {
-      searchQuery.value = ''
-      selectedStatus.value = ''
-      await qasStore.fetchQAs({ page: 1, limit: 10 })
-    }
+      searchQuery.value = "";
+      selectedStatus.value = "";
+      await qasStore.fetchQAs({ qa_type: "CUSTOMER", page: 1, page_size: 10 });
+    };
 
     const changePage = async (page) => {
-      if (page < 1 || page > pagination.value.totalPages) return
-      
+      if (page < 1 || page > pagination.value.totalPages) return;
+
       const params = {
+        qa_type: "CUSTOMER",
         page,
-        limit: 10
-      }
-      
-      if (searchQuery.value) params.search = searchQuery.value
-      if (selectedStatus.value) params.status = selectedStatus.value
-      
-      await qasStore.fetchQAs(params)
-    }
+        page_size: 10,
+      };
+
+      if (searchQuery.value) params.search = searchQuery.value;
+      if (selectedStatus.value) params.status = selectedStatus.value;
+
+      await qasStore.fetchQAs(params);
+    };
 
     const goToDetail = (id) => {
-      router.push(`/qa/${id}`)
-    }
+      router.push(`/qa/${id}`);
+    };
 
     onMounted(() => {
-      qasStore.fetchQAs({ page: 1, limit: 10 })
-    })
+      qasStore.fetchQAs({ qa_type:"CUSTOMER", page: 1, page_size: 10 });
+    });
 
     return {
       searchQuery,
@@ -298,8 +419,8 @@ export default {
       search,
       resetSearch,
       changePage,
-      goToDetail
-    }
-  }
-}
+      goToDetail,
+    };
+  },
+};
 </script>
