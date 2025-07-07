@@ -30,14 +30,14 @@
             class="text-white hover:text-primary-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             active-class="bg-primary-700"
           >
-            정류장
+            똑버스
           </router-link>
           <router-link 
             to="/location" 
             class="text-white hover:text-primary-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             active-class="bg-primary-700"
           >
-            위치
+            오시는 길
           </router-link>
           <router-link 
             to="/notice" 

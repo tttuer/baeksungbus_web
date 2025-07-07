@@ -43,33 +43,6 @@
               </svg>
               대표전화: 031-673-3456
             </p>
-            <p class="flex items-center">
-              <svg
-                class="w-4 h-4 mr-2 text-primary-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-              baeksungbus@email.com
-            </p>
-          </div>
-        </div>
-
-        <div>
-          <h5 class="text-xl font-bold mb-4">운행 시간</h5>
-          <div class="space-y-2 text-gray-300">
-            <p>평일: 05:30 ~ 23:00</p>
-            <p>주말/공휴일: 06:00 ~ 22:30</p>
-            <p class="text-sm text-gray-400">
-              ※ 날씨 및 교통상황에 따라 변경될 수 있습니다.
-            </p>
           </div>
         </div>
       </div>
