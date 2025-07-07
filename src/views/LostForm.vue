@@ -162,42 +162,6 @@
           </div>
         </div>
 
-        <!-- Contact Preference -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            연락 받을 방법
-          </label>
-          <div class="space-y-2">
-            <label class="flex items-center">
-              <input
-                v-model="form.contact_method"
-                type="radio"
-                value="phone"
-                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-              />
-              <span class="ml-2 text-sm text-gray-700">전화</span>
-            </label>
-            <label class="flex items-center">
-              <input
-                v-model="form.contact_method"
-                type="radio"
-                value="sms"
-                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-              />
-              <span class="ml-2 text-sm text-gray-700">문자메시지</span>
-            </label>
-            <label class="flex items-center">
-              <input
-                v-model="form.contact_method"
-                type="radio"
-                value="both"
-                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300"
-              />
-              <span class="ml-2 text-sm text-gray-700">전화 + 문자</span>
-            </label>
-          </div>
-        </div>
-
         <!-- Privacy Agreement -->
         <div class="mb-6">
           <div class="flex items-start">
