@@ -1,5 +1,35 @@
 <template>
   <div class="qa">
+    <!-- Password Modal -->
+    <div v-if="showPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <h3 class="text-lg font-semibold mb-4">비밀번호 확인</h3>
+        <p class="text-gray-600 mb-4">이 글을 보려면 비밀번호가 필요합니다.</p>
+        <form @submit.prevent="checkPassword">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
+            <input
+              v-model="passwordInput"
+              type="password"
+              class="form-input"
+              placeholder="비밀번호를 입력하세요"
+              required
+              ref="passwordInputRef"
+            />
+          </div>
+          <div class="flex gap-2 justify-end">
+            <button type="button" @click="closePasswordModal" class="btn btn-outline">취소</button>
+            <button type="submit" class="btn btn-primary" :disabled="isCheckingPassword">
+              <svg v-if="isCheckingPassword" class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              {{ isCheckingPassword ? '확인 중...' : '확인' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
     <!-- Page Header -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
       <div
@@ -117,7 +147,7 @@
           v-for="qa in qas"
           :key="qa.id"
           class="card p-6 hover:shadow-lg transition-shadow cursor-pointer"
-          @click="goToDetail(qa.id)"
+          @click="goToDetail(qa)"
         >
           <div class="flex justify-between items-start mb-4">
             <div class="flex-1">
@@ -134,9 +164,6 @@
                   {{ getStatusLabel(qa.status) }}
                 </span>
               </div>
-              <p class="text-gray-600 line-clamp-2 mb-3">
-                {{ qa.content?.substring(0, 150) }}...
-              </p>
               <div class="flex items-center text-sm text-gray-500 gap-4">
                 <span class="flex items-center">
                   <svg
@@ -152,7 +179,7 @@
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  {{ qa.author_name }}
+                  {{ qa.writer }}
                 </span>
                 <span class="flex items-center">
                   <svg
@@ -168,7 +195,7 @@
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  {{ formatDate(qa.created_at) }}
+                  {{ formatDate(qa.c_date) }}
                 </span>
                 <span v-if="qa.file_name" class="flex items-center">
                   <svg
@@ -299,9 +326,10 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
+import api from "@/services/api";
 
 export default {
   name: "QA",
@@ -311,6 +339,12 @@ export default {
 
     const searchQuery = ref("");
     const selectedStatus = ref("");
+    
+    const showPasswordModal = ref(false);
+    const passwordInput = ref('');
+    const isCheckingPassword = ref(false);
+    const passwordInputRef = ref(null);
+    const selectedItemId = ref(null);
 
     const isLoading = computed(() => qasStore.isLoading);
     const qas = computed(() => qasStore.qas);
@@ -398,8 +432,46 @@ export default {
       await qasStore.fetchQAs(params);
     };
 
-    const goToDetail = (id) => {
-      router.push(`/qa/${id}`);
+    const goToDetail = async (item) => {
+      selectedItemId.value = item.id;
+      
+      // 비밀번호가 설정된 글이면 비밀번호 모달 표시
+      if (item.hidden) {
+        showPasswordModal.value = true;
+        await nextTick();
+        passwordInputRef.value?.focus();
+      } else {
+        router.push(`/qa/${item.id}`);
+      }
+    };
+    
+    const checkPassword = async () => {
+      try {
+        isCheckingPassword.value = true;
+        
+        await api.get(`/api/qas/${selectedItemId.value}/check_password`, {
+          params: { password: passwordInput.value }
+        });
+        
+        showPasswordModal.value = false;
+        passwordInput.value = '';
+        router.push(`/qa/${selectedItemId.value}`);
+        
+      } catch (error) {
+        if (error.response?.status === 403) {
+          alert('비밀번호가 올바르지 않습니다.');
+        } else {
+          alert('비밀번호 확인에 실패했습니다.');
+        }
+      } finally {
+        isCheckingPassword.value = false;
+      }
+    };
+    
+    const closePasswordModal = () => {
+      showPasswordModal.value = false;
+      passwordInput.value = '';
+      selectedItemId.value = null;
     };
 
     onMounted(() => {
@@ -420,6 +492,12 @@ export default {
       resetSearch,
       changePage,
       goToDetail,
+      showPasswordModal,
+      passwordInput,
+      isCheckingPassword,
+      passwordInputRef,
+      checkPassword,
+      closePasswordModal,
     };
   },
 };

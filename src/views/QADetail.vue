@@ -11,7 +11,7 @@
       <nav class="flex text-sm text-gray-500">
         <router-link to="/" class="hover:text-primary-600">홈</router-link>
         <span class="mx-2">/</span>
-        <router-link to="/qa" class="hover:text-primary-600">Q&A</router-link>
+        <router-link :to="getListRoute()" class="hover:text-primary-600">{{ getListTitle() }}</router-link>
         <span class="mx-2">/</span>
         <span class="text-gray-900">{{ qa.title }}</span>
       </nav>
@@ -237,18 +237,18 @@
 
       <!-- Action Buttons -->
       <div class="flex justify-between items-center">
-        <router-link to="/qa" class="btn btn-outline">
+        <router-link :to="getListRoute()" class="btn btn-outline">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
           </svg>
           목록으로
         </router-link>
         
-        <router-link to="/qa/form" class="btn btn-primary">
+        <router-link :to="getFormRoute()" class="btn btn-primary">
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
-          새 문의하기
+          {{ getFormTitle() }}
         </router-link>
       </div>
     </div>
@@ -260,8 +260,8 @@
       </svg>
       <h3 class="text-lg font-medium text-gray-900 mb-2">Q&A를 찾을 수 없습니다</h3>
       <p class="text-gray-600 mb-4">요청하신 Q&A가 존재하지 않거나 삭제되었습니다.</p>
-      <router-link to="/qa" class="btn btn-primary">
-        Q&A 목록으로
+      <router-link :to="getListRoute()" class="btn btn-primary">
+        {{ getListTitle() }} 목록으로
       </router-link>
     </div>
   </div>
@@ -387,11 +387,31 @@ export default {
         try {
           await qasStore.deleteQA(qa.value.id)
           alert('Q&A가 삭제되었습니다.')
-          router.push('/qa')
+          router.push(getListRoute())
         } catch (error) {
           alert('삭제에 실패했습니다.')
         }
       }
+    }
+
+    const getListRoute = () => {
+      if (!qa.value) return '/qa'
+      return qa.value.qa_type === 'LOST' ? '/lost' : '/qa'
+    }
+
+    const getListTitle = () => {
+      if (!qa.value) return 'Q&A'
+      return qa.value.qa_type === 'LOST' ? '분실물' : 'Q&A'
+    }
+
+    const getFormRoute = () => {
+      if (!qa.value) return '/qa/form'
+      return qa.value.qa_type === 'LOST' ? '/lost/form' : '/qa/form'
+    }
+
+    const getFormTitle = () => {
+      if (!qa.value) return '새 문의하기'
+      return qa.value.qa_type === 'LOST' ? '분실물 신고' : '새 문의하기'
     }
 
     const loadQA = async () => {
@@ -445,7 +465,11 @@ export default {
       handleAnswerFile,
       submitAnswer,
       cancelAnswer,
-      deleteQA
+      deleteQA,
+      getListRoute,
+      getListTitle,
+      getFormRoute,
+      getFormTitle
     }
   }
 }
