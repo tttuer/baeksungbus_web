@@ -47,12 +47,14 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               비밀번호(글 수정, 삭제 시 필요합니다)
+              <span class="text-red-500">*</span>
             </label>
             <input
               v-model="form.password"
               type="password"
               class="form-input"
               placeholder="비밀번호를 입력하세요"
+              required
             />
           </div>
         </div>
@@ -280,7 +282,7 @@ export default {
       content: "",
       file: null,
       captcha: "",
-      hidden: false, // 비밀글 여부
+      hidden: true, // 비밀글 여부
     });
 
     const handleFileUpload = (event) => {
