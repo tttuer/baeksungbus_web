@@ -26,9 +26,9 @@
               </span>
               <span 
                 class="px-2 py-1 text-sm font-medium rounded"
-                :class="getStatusClass(qa.status)"
+                :class="getStatusClass(qa.done)"
               >
-                {{ getStatusLabel(qa.status) }}
+                {{ getStatusLabel(qa.done) }}
               </span>
             </div>
             <h1 class="text-2xl font-bold text-gray-900 mb-3">{{ qa.title }}</h1>
@@ -37,7 +37,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                {{ qa.author_name }}
+                {{ qa.writer }}
               </span>
               <span class="flex items-center">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                {{ formatDate(qa.created_at) }}
+                {{ formatDate(qa.c_date) }}
               </span>
             </div>
           </div>
@@ -298,13 +298,13 @@ export default {
     const canAnswer = computed(() => authStore.isAdmin)
 
     const getStatusClass = (status) => {
-      return status === 'answered' 
+      return status === true 
         ? 'bg-green-100 text-green-800' 
         : 'bg-yellow-100 text-yellow-800'
     }
 
     const getStatusLabel = (status) => {
-      return status === 'answered' ? '답변완료' : '답변대기'
+      return status === true ? '답변완료' : '답변대기'
     }
 
     const formatDate = (dateString) => {

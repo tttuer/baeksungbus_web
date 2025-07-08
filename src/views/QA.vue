@@ -159,9 +159,9 @@
                 </h3>
                 <span
                   class="px-2 py-1 text-xs font-medium rounded"
-                  :class="getStatusClass(qa.status)"
+                  :class="getStatusClass(qa.done)"
                 >
-                  {{ getStatusLabel(qa.status) }}
+                  {{ getStatusLabel(qa.done) }}
                 </span>
               </div>
               <div class="flex items-center text-sm text-gray-500 gap-4">
@@ -386,7 +386,7 @@ export default {
     };
 
     const getStatusLabel = (status) => {
-      return status === "answered" ? "답변완료" : "답변대기";
+      return status === true ? "답변완료" : "답변대기";
     };
 
     const formatDate = (dateString) => {
