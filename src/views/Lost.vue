@@ -1,13 +1,18 @@
 <template>
   <div class="lost">
     <!-- Password Modal -->
-    <div v-if="showPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      v-if="showPasswordModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
       <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <h3 class="text-lg font-semibold mb-4">비밀번호 확인</h3>
         <p class="text-gray-600 mb-4">이 글을 보려면 비밀번호가 필요합니다.</p>
         <form @submit.prevent="checkPassword">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >비밀번호</label
+            >
             <input
               v-model="passwordInput"
               type="password"
@@ -18,13 +23,39 @@
             />
           </div>
           <div class="flex gap-2 justify-end">
-            <button type="button" @click="closePasswordModal" class="btn btn-outline">취소</button>
-            <button type="submit" class="btn btn-primary" :disabled="isCheckingPassword">
-              <svg v-if="isCheckingPassword" class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            <button
+              type="button"
+              @click="closePasswordModal"
+              class="btn btn-outline"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="isCheckingPassword"
+            >
+              <svg
+                v-if="isCheckingPassword"
+                class="w-4 h-4 mr-2 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
               </svg>
-              {{ isCheckingPassword ? '확인 중...' : '확인' }}
+              {{ isCheckingPassword ? "확인 중..." : "확인" }}
             </button>
           </div>
         </form>
@@ -58,10 +89,78 @@
       </div>
     </div>
 
+    <div class="card p-6 mb-6">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >검색</label
+          >
+          <div class="relative">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="제목, 내용 또는 작성자로 검색"
+              class="form-input pl-10"
+              @keyup.enter="search"
+            />
+            <svg
+              class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="flex items-end gap-2">
+          <button @click="search" class="btn btn-primary">
+            <svg
+              class="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            검색
+          </button>
+          <button @click="resetSearch" class="btn btn-outline">
+            <svg
+              class="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            초기화
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div v-if="isLoading" class="loading">
       <div class="spinner"></div>
     </div>
+
+    <!-- Search Bar -->
 
     <!-- Lost Items List -->
     <div v-else>
@@ -91,27 +190,70 @@
 
           <div class="flex justify-between items-center text-sm text-gray-500">
             <span class="flex items-center">
-                  <svg
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                  {{ item.writer }}
-                </span>
+              <svg
+                class="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              {{ item.writer }}
+            </span>
             <span>신고일: {{ formatDate(item.c_date) }}</span>
           </div>
         </div>
       </div>
 
-      <div v-else class="card p-12 text-center">
+      <!-- Pagination -->
+      <div
+        v-if="lostItems.length > 0 && pagination.totalPages > 1"
+        class="mt-8 flex justify-center"
+      >
+        <nav class="flex items-center space-x-2">
+          <!-- Previous Button -->
+          <button
+            @click="goToPage(pagination.page - 1)"
+            :disabled="pagination.page <= 1"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            이전
+          </button>
+
+          <!-- Page Numbers -->
+          <template v-for="page in getPageNumbers()" :key="page">
+            <button
+              v-if="page !== '...'"
+              @click="goToPage(page)"
+              :class="[
+                'px-3 py-2 text-sm font-medium rounded-md',
+                page === pagination.page
+                  ? 'bg-primary-600 text-white'
+                  : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50',
+              ]"
+            >
+              {{ page }}
+            </button>
+            <span v-else class="px-3 py-2 text-gray-500">...</span>
+          </template>
+
+          <!-- Next Button -->
+          <button
+            @click="goToPage(pagination.page + 1)"
+            :disabled="pagination.page >= pagination.totalPages"
+            class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            다음
+          </button>
+        </nav>
+      </div>
+
+      <div v-else-if="lostItems.length === 0" class="card p-12 text-center">
         <svg
           class="w-16 h-16 text-gray-400 mx-auto mb-4"
           fill="none"
@@ -240,12 +382,22 @@ export default {
     const lostDate = ref("");
     const selectedRoute = ref("");
     const selectedStatus = ref("");
+    const currentPage = ref(1);
 
     const isLoading = computed(() => qasStore.isLoading);
     const lostItems = computed(() => qasStore.qas);
-    
+    const pagination = computed(
+      () =>
+        qasStore.pagination || {
+          page: 1,
+          limit: 12,
+          total: 0,
+          totalPages: 1,
+        }
+    );
+
     const showPasswordModal = ref(false);
-    const passwordInput = ref('');
+    const passwordInput = ref("");
     const isCheckingPassword = ref(false);
     const passwordInputRef = ref(null);
     const selectedItemId = ref(null);
@@ -270,13 +422,14 @@ export default {
     };
 
     const search = async () => {
+      currentPage.value = 1;
       const params = {
         qa_type: "LOST",
-        page: 1,
-        page_size: 10,
+        page: currentPage.value,
+        page_size: 12,
       };
 
-      if (searchQuery.value) params.search = searchQuery.value;
+      if (searchQuery.value) params.filter = searchQuery.value;
       if (selectedStatus.value) params.status = selectedStatus.value;
 
       await qasStore.fetchQAs(params);
@@ -287,18 +440,69 @@ export default {
       lostDate.value = "";
       selectedRoute.value = "";
       selectedStatus.value = "";
+      currentPage.value = 1;
       await qasStore.fetchQAs({ qa_type: "LOST", page: 1, page_size: 10 });
     };
 
+    const goToPage = async (page) => {
+      if (page < 1 || page > pagination.value.totalPages) return;
+
+      currentPage.value = page;
+      const params = {
+        qa_type: "LOST",
+        page: page,
+        page_size: 12,
+      };
+
+      if (searchQuery.value) params.filter = searchQuery.value;
+      if (selectedStatus.value) params.status = selectedStatus.value;
+
+      await qasStore.fetchQAs(params);
+    };
+
+    const getPageNumbers = () => {
+      const totalPages = pagination.value.totalPages;
+      const current = pagination.value.page;
+      const pages = [];
+
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        if (current <= 4) {
+          for (let i = 1; i <= 5; i++) {
+            pages.push(i);
+          }
+          pages.push("...");
+          pages.push(totalPages);
+        } else if (current >= totalPages - 3) {
+          pages.push(1);
+          pages.push("...");
+          for (let i = totalPages - 4; i <= totalPages; i++) {
+            pages.push(i);
+          }
+        } else {
+          pages.push(1);
+          pages.push("...");
+          for (let i = current - 1; i <= current + 1; i++) {
+            pages.push(i);
+          }
+          pages.push("...");
+          pages.push(totalPages);
+        }
+      }
+
+      return pages;
+    };
+
     const contactForClaim = (item) => {
-      alert(
-        `분실물 찾기 신청\n\n물품: ${item.title}\n연락처: 031-673-3456`
-      );
+      alert(`분실물 찾기 신청\n\n물품: ${item.title}\n연락처: 031-673-3456`);
     };
 
     const goToDetail = async (item) => {
       selectedItemId.value = item.id;
-      
+
       // 비밀번호가 설정된 글이면 비밀번호 모달 표시
       if (item.hidden) {
         showPasswordModal.value = true;
@@ -308,52 +512,55 @@ export default {
         router.push(`/qa/${item.id}`);
       }
     };
-    
+
     const checkPassword = async () => {
       try {
         isCheckingPassword.value = true;
-        
+
         await api.get(`/api/qas/${selectedItemId.value}/check_password`, {
-          params: { password: passwordInput.value }
+          params: { password: passwordInput.value },
         });
-        
+
         showPasswordModal.value = false;
-        passwordInput.value = '';
+        passwordInput.value = "";
         router.push(`/qa/${selectedItemId.value}`);
-        
       } catch (error) {
         if (error.response?.status === 403) {
-          alert('비밀번호가 올바르지 않습니다.');
+          alert("비밀번호가 올바르지 않습니다.");
         } else {
-          alert('비밀번호 확인에 실패했습니다.');
+          alert("비밀번호 확인에 실패했습니다.");
         }
       } finally {
         isCheckingPassword.value = false;
       }
     };
-    
+
     const closePasswordModal = () => {
       showPasswordModal.value = false;
-      passwordInput.value = '';
+      passwordInput.value = "";
       selectedItemId.value = null;
     };
 
     onMounted(() => {
-      qasStore.fetchQAs({ qa_type: "LOST", page: 1, page_size: 10 });
+      qasStore.fetchQAs({ qa_type: "LOST", page: 1, page_size: 12 });
     });
 
     return {
       isLoading,
       lostItems,
+      pagination,
       searchQuery,
       lostDate,
       selectedRoute,
       selectedStatus,
+      currentPage,
       getStatusClass,
       getStatusLabel,
       formatDate,
       search,
       resetSearch,
+      goToPage,
+      getPageNumbers,
       contactForClaim,
       goToDetail,
       showPasswordModal,

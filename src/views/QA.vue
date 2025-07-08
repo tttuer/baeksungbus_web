@@ -1,13 +1,18 @@
 <template>
   <div class="qa">
     <!-- Password Modal -->
-    <div v-if="showPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div
+      v-if="showPasswordModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
       <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <h3 class="text-lg font-semibold mb-4">비밀번호 확인</h3>
         <p class="text-gray-600 mb-4">이 글을 보려면 비밀번호가 필요합니다.</p>
         <form @submit.prevent="checkPassword">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >비밀번호</label
+            >
             <input
               v-model="passwordInput"
               type="password"
@@ -18,13 +23,39 @@
             />
           </div>
           <div class="flex gap-2 justify-end">
-            <button type="button" @click="closePasswordModal" class="btn btn-outline">취소</button>
-            <button type="submit" class="btn btn-primary" :disabled="isCheckingPassword">
-              <svg v-if="isCheckingPassword" class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            <button
+              type="button"
+              @click="closePasswordModal"
+              class="btn btn-outline"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="isCheckingPassword"
+            >
+              <svg
+                v-if="isCheckingPassword"
+                class="w-4 h-4 mr-2 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
               </svg>
-              {{ isCheckingPassword ? '확인 중...' : '확인' }}
+              {{ isCheckingPassword ? "확인 중..." : "확인" }}
             </button>
           </div>
         </form>
@@ -69,7 +100,7 @@
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="제목 또는 내용으로 검색..."
+              placeholder="제목, 내용 또는 작성자로 검색"
               class="form-input pl-10"
               @keyup.enter="search"
             />
@@ -87,16 +118,6 @@
               />
             </svg>
           </div>
-        </div>
-        <div class="w-full md:w-48">
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >상태</label
-          >
-          <select v-model="selectedStatus" class="form-select">
-            <option value="">전체</option>
-            <option value="pending">답변대기</option>
-            <option value="answered">답변완료</option>
-          </select>
         </div>
         <div class="flex items-end gap-2">
           <button @click="search" class="btn btn-primary">
@@ -282,13 +303,7 @@
 
       <!-- Pagination -->
       <div v-if="qas.length > 0" class="mt-8">
-        <div class="flex items-center justify-between">
-          <div class="text-sm text-gray-700">
-            총 {{ pagination.total }}개 중
-            {{ (pagination.page - 1) * pagination.total_pages + 1 }}-{{
-              Math.min(pagination.page * pagination.total_pages, pagination.total)
-            }}개 표시
-          </div>
+        <div class="flex items-center justify-center">
           <div class="pagination">
             <button
               @click="changePage(pagination.page - 1)"
@@ -339,9 +354,9 @@ export default {
 
     const searchQuery = ref("");
     const selectedStatus = ref("");
-    
+
     const showPasswordModal = ref(false);
-    const passwordInput = ref('');
+    const passwordInput = ref("");
     const isCheckingPassword = ref(false);
     const passwordInputRef = ref(null);
     const selectedItemId = ref(null);
@@ -405,7 +420,7 @@ export default {
         page_size: 10,
       };
 
-      if (searchQuery.value) params.search = searchQuery.value;
+      if (searchQuery.value) params.filter = searchQuery.value;
       if (selectedStatus.value) params.status = selectedStatus.value;
 
       await qasStore.fetchQAs(params);
@@ -434,7 +449,7 @@ export default {
 
     const goToDetail = async (item) => {
       selectedItemId.value = item.id;
-      
+
       // 비밀번호가 설정된 글이면 비밀번호 모달 표시
       if (item.hidden) {
         showPasswordModal.value = true;
@@ -444,38 +459,37 @@ export default {
         router.push(`/qa/${item.id}`);
       }
     };
-    
+
     const checkPassword = async () => {
       try {
         isCheckingPassword.value = true;
-        
+
         await api.get(`/api/qas/${selectedItemId.value}/check_password`, {
-          params: { password: passwordInput.value }
+          params: { password: passwordInput.value },
         });
-        
+
         showPasswordModal.value = false;
-        passwordInput.value = '';
+        passwordInput.value = "";
         router.push(`/qa/${selectedItemId.value}`);
-        
       } catch (error) {
         if (error.response?.status === 403) {
-          alert('비밀번호가 올바르지 않습니다.');
+          alert("비밀번호가 올바르지 않습니다.");
         } else {
-          alert('비밀번호 확인에 실패했습니다.');
+          alert("비밀번호 확인에 실패했습니다.");
         }
       } finally {
         isCheckingPassword.value = false;
       }
     };
-    
+
     const closePasswordModal = () => {
       showPasswordModal.value = false;
-      passwordInput.value = '';
+      passwordInput.value = "";
       selectedItemId.value = null;
     };
 
     onMounted(() => {
-      qasStore.fetchQAs({ qa_type:"CUSTOMER", page: 1, page_size: 10 });
+      qasStore.fetchQAs({ qa_type: "CUSTOMER", page: 1, page_size: 10 });
     });
 
     return {
