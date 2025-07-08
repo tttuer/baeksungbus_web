@@ -74,54 +74,54 @@ const router = createRouter({
       name: 'recruit',
       component: () => import('@/views/Recruit.vue')
     },
-    // {
-    //   path: '/admin',
-    //   name: 'admin',
-    //   component: () => import('@/views/admin/AdminLayout.vue'),
-    //   redirect: '/admin/dashboard',
-    //   children: [
-    //     {
-    //       path: 'dashboard',
-    //       name: 'admin-dashboard',
-    //       component: () => import('@/views/admin/Dashboard.vue')
-    //     },
-    //     {
-    //       path: 'schedule',
-    //       name: 'admin-schedule',
-    //       component: () => import('@/views/admin/Schedule.vue')
-    //     },
-    //     {
-    //       path: 'notice',
-    //       name: 'admin-notice',
-    //       component: () => import('@/views/admin/Notice.vue')
-    //     },
-    //     {
-    //       path: 'customer',
-    //       name: 'admin-customer',
-    //       component: () => import('@/views/admin/Customer.vue')
-    //     },
-    //     {
-    //       path: 'customer/:id',
-    //       name: 'admin-customer-detail',
-    //       component: () => import('@/views/admin/CustomerDetail.vue')
-    //     },
-    //     {
-    //       path: 'ddock',
-    //       name: 'admin-ddock',
-    //       component: () => import('@/views/admin/Ddock.vue')
-    //     },
-    //     {
-    //       path: 'lost',
-    //       name: 'admin-lost',
-    //       component: () => import('@/views/admin/Lost.vue')
-    //     }
-    //   ]
-    // },
-    // {
-    //   path: '/admin/login',
-    //   name: 'admin-login',
-    //   component: () => import('@/views/admin/Login.vue')
-    // }
+    {
+      path: '/adm',
+      name: 'admin',
+      component: () => import('@/views/admin/AdminLayout.vue'),
+      redirect: '/adm/dashboard',
+      children: [
+        {
+          path: 'dashboard',
+          name: 'admin-dashboard',
+          component: () => import('@/views/admin/Dashboard.vue')
+        },
+        {
+          path: 'schedule',
+          name: 'admin-schedule',
+          component: () => import('@/views/admin/Schedule.vue')
+        },
+        {
+          path: 'notice',
+          name: 'admin-notice',
+          component: () => import('@/views/admin/Notice.vue')
+        },
+        {
+          path: 'customer',
+          name: 'admin-customer',
+          component: () => import('@/views/admin/Customer.vue')
+        },
+        {
+          path: 'customer/:id',
+          name: 'admin-customer-detail',
+          component: () => import('@/views/admin/CustomerDetail.vue')
+        },
+        {
+          path: 'ddock',
+          name: 'admin-ddock',
+          component: () => import('@/views/admin/Ddock.vue')
+        },
+        {
+          path: 'lost',
+          name: 'admin-lost',
+          component: () => import('@/views/admin/Lost.vue')
+        }
+      ]
+    },
+    {
+      path: '/adm/login',
+      name: 'admin-login',
+      component: () => import('@/views/admin/Login.vue')
+    }
   ]
 })
 

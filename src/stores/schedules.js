@@ -11,9 +11,10 @@ export const useSchedulesStore = defineStore('schedules', () => {
     try {
       isLoading.value = true
       const response = await api.get('/api/schedules', { params })
-      schedules.value = response.data.items || response.data
+      schedules.value = response.data.items || response.data.schedules || response.data || []
     } catch (error) {
       console.error('스케줄 목록 조회 실패:', error)
+      schedules.value = []
     } finally {
       isLoading.value = false
     }

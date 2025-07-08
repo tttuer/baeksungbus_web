@@ -11,9 +11,10 @@ export const useDdocksStore = defineStore('ddocks', () => {
     try {
       isLoading.value = true
       const response = await api.get('/api/ddocks', { params })
-      ddocks.value = response.data.items || response.data
+      ddocks.value = response.data.ddocks || response.data.items || response.data || []
     } catch (error) {
-      console.error('정류장 목록 조회 실패:', error)
+      console.error('갤러리 목록 조회 실패:', error)
+      ddocks.value = []
     } finally {
       isLoading.value = false
     }
@@ -39,7 +40,7 @@ export const useDdocksStore = defineStore('ddocks', () => {
       await fetchDdocks()
       return response.data
     } catch (error) {
-      console.error('정류장 생성 실패:', error)
+      console.error('갤러리 생성 실패:', error)
       throw error
     }
   }
@@ -50,7 +51,18 @@ export const useDdocksStore = defineStore('ddocks', () => {
       await fetchDdocks()
       return response.data
     } catch (error) {
-      console.error('정류장 수정 실패:', error)
+      console.error('갤러리 수정 실패:', error)
+      throw error
+    }
+  }
+
+  const updateOrder = async (orderData) => {
+    try {
+      const response = await api.patch('/api/ddocks/order', { orders: orderData })
+      await fetchDdocks()
+      return response.data
+    } catch (error) {
+      console.error('순서 업데이트 실패:', error)
       throw error
     }
   }
@@ -60,7 +72,7 @@ export const useDdocksStore = defineStore('ddocks', () => {
       await api.delete(`/api/ddocks/${id}`)
       await fetchDdocks()
     } catch (error) {
-      console.error('정류장 삭제 실패:', error)
+      console.error('갤러리 삭제 실패:', error)
       throw error
     }
   }
@@ -73,6 +85,7 @@ export const useDdocksStore = defineStore('ddocks', () => {
     fetchDdockById,
     createDdock,
     updateDdock,
+    updateOrder,
     deleteDdock
   }
 })

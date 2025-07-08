@@ -17,13 +17,14 @@ export const useNoticesStore = defineStore('notices', () => {
     try {
       isLoading.value = true
       const response = await api.get('/api/notices', { params })
-      notices.value = response.data.items || response.data
+      notices.value = response.data.items || response.data.notices || response.data || []
       
       if (response.data.pagination) {
         pagination.value = response.data.pagination
       }
     } catch (error) {
       console.error('공지사항 목록 조회 실패:', error)
+      notices.value = []
     } finally {
       isLoading.value = false
     }

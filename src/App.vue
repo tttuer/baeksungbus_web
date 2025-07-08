@@ -1,15 +1,16 @@
 <template>
   <div id="app" class="min-h-screen flex flex-col bg-gray-50">
-    <TheHeader />
-    <main class="flex-1 container mx-auto px-4 py-8">
+    <TheHeader v-if="!isAdminPage" />
+    <main class="flex-1" :class="isAdminPage ? '' : 'container mx-auto px-4 py-8'">
       <router-view />
     </main>
-    <TheFooter />
+    <TheFooter v-if="!isAdminPage" />
   </div>
 </template>
 
 <script>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import TheHeader from '@/components/TheHeader.vue'
 import TheFooter from '@/components/TheFooter.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -21,13 +22,20 @@ export default {
     TheFooter
   },
   setup() {
+    const route = useRoute()
     const authStore = useAuthStore()
+
+    const isAdminPage = computed(() => {
+      return route.path.startsWith('/adm')
+    })
 
     onMounted(() => {
       authStore.initAuth()
     })
 
-    return {}
+    return {
+      isAdminPage
+    }
   }
 }
 </script>
