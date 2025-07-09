@@ -43,21 +43,6 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input
-              id="remember-me"
-              v-model="form.rememberMe"
-              name="remember-me"
-              type="checkbox"
-              class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-            />
-            <label for="remember-me" class="ml-2 block text-sm text-gray-900">
-              로그인 상태 유지
-            </label>
-          </div>
-        </div>
-
         <div>
           <button
             type="submit"
@@ -157,14 +142,7 @@ export default {
         
       } catch (error) {
         console.error('로그인 실패:', error)
-        
-        if (error.response?.status === 401) {
-          errorMessage.value = '사용자명 또는 비밀번호가 올바르지 않습니다.'
-        } else if (error.response?.status === 403) {
-          errorMessage.value = '관리자 권한이 없습니다.'
-        } else {
-          errorMessage.value = '로그인 중 오류가 발생했습니다. 다시 시도해주세요.'
-        }
+        errorMessage.value = error.message || '로그인 중 오류가 발생했습니다. 다시 시도해주세요.'
       } finally {
         isLoading.value = false
       }

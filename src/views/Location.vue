@@ -119,7 +119,7 @@ export default {
 
     onMounted(() => {
       const script = document.createElement("script");
-      script.src = `//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=a1c70c867cb8d4ea20eee1c528f1c139`;
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?autoload=false&appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}`;
       script.onload = () => {
         window.kakao.maps.load(() => {
           initMap();
