@@ -2,12 +2,12 @@
   <div class="schedule">
     <!-- Page Header -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">버스 시간표</h1>
-      <p class="text-gray-600">백성운수 버스 운행 시간표를 확인하세요</p>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">버스 노선</h1>
+      <p class="text-gray-600">백성운수 버스 운행 노선을 확인하세요</p>
     </div>
 
     <!-- Filters -->
-    <div class="card p-6 mb-6">
+    <!-- <div class="card p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">출발지</label>
@@ -51,7 +51,7 @@
           초기화
         </button>
       </div>
-    </div>
+    </div> -->
 
     <!-- Loading -->
     <div v-if="isLoading" class="loading">
@@ -60,57 +60,47 @@
 
     <!-- Schedule List -->
     <div v-else>
-      <div v-if="schedules.length > 0" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div 
-          v-for="schedule in schedules" 
+      <div
+        v-if="schedules.length > 0"
+        class="grid grid-cols-1 lg:grid-cols-4 gap-6"
+      >
+        <div
+          v-for="schedule in schedules"
           :key="schedule.id"
           class="card p-6 hover:shadow-lg transition-shadow cursor-pointer"
-          @click="goToDetail(schedule.id)"
+          @click="goToDetail(schedule.url)"
         >
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-1">
-                {{ schedule.departure }} → {{ schedule.destination }}
-              </h3>
-              <p class="text-gray-600">{{ schedule.route_name }}</p>
-            </div>
-            <span class="bg-primary-100 text-primary-800 text-sm font-medium px-2 py-1 rounded">
-              {{ schedule.type }}
-            </span>
-          </div>
-          
-          <div class="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <p class="text-sm text-gray-500 mb-1">첫차</p>
-              <p class="font-medium">{{ schedule.first_time }}</p>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500 mb-1">막차</p>
-              <p class="font-medium">{{ schedule.last_time }}</p>
-            </div>
-          </div>
-          
           <div class="mb-4">
-            <p class="text-sm text-gray-500 mb-1">배차간격</p>
-            <p class="font-medium">{{ schedule.interval }}분</p>
+            <h2 class="text-3xl font-semibold mb-2">
+              {{ schedule.route_number }}번
+            </h2>
           </div>
-          
+
           <div class="flex justify-between items-center">
-            <p class="text-sm text-gray-500">
-              소요시간: {{ schedule.duration }}분
-            </p>
-            <button class="text-primary-600 hover:text-primary-700 text-sm font-medium">
+            <button
+              class="text-primary-600 hover:text-primary-700 text-sm font-medium"
+            >
               상세보기 →
             </button>
           </div>
         </div>
       </div>
-      
+
       <div v-else class="card p-12 text-center">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        <svg
+          class="w-16 h-16 text-gray-400 mx-auto mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
         </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">시간표가 없습니다</h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">노선이 없습니다</h3>
         <p class="text-gray-600">검색 조건을 변경해보세요.</p>
       </div>
     </div>
@@ -118,48 +108,48 @@
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useSchedulesStore } from '@/stores/schedules'
+import { ref, reactive, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useSchedulesStore } from "@/stores/schedules";
 
 export default {
-  name: 'Schedule',
+  name: "Schedule",
   setup() {
-    const router = useRouter()
-    const schedulesStore = useSchedulesStore()
-    
-    const filters = reactive({
-      departure: '',
-      destination: '',
-      type: ''
-    })
+    const router = useRouter();
+    const schedulesStore = useSchedulesStore();
 
-    const isLoading = computed(() => schedulesStore.isLoading)
-    const schedules = computed(() => schedulesStore.schedules)
+    const filters = reactive({
+      departure: "",
+      destination: "",
+      type: "",
+    });
+
+    const isLoading = computed(() => schedulesStore.isLoading);
+    const schedules = computed(() => schedulesStore.schedules);
 
     const applyFilters = async () => {
-      const params = {}
-      if (filters.departure) params.departure = filters.departure
-      if (filters.destination) params.destination = filters.destination
-      if (filters.type) params.type = filters.type
-      
-      await schedulesStore.fetchSchedules(params)
-    }
+      const params = {};
+      if (filters.departure) params.departure = filters.departure;
+      if (filters.destination) params.destination = filters.destination;
+      if (filters.type) params.type = filters.type;
+
+      await schedulesStore.fetchSchedules(params);
+    };
 
     const resetFilters = async () => {
-      filters.departure = ''
-      filters.destination = ''
-      filters.type = ''
-      await schedulesStore.fetchSchedules()
-    }
+      filters.departure = "";
+      filters.destination = "";
+      filters.type = "";
+      await schedulesStore.fetchSchedules();
+    };
 
-    const goToDetail = (id) => {
-      router.push(`/schedule/${id}`)
-    }
+    const goToDetail = (url) => {
+      window.open(url, "_blank");
+    };
 
     onMounted(() => {
-      schedulesStore.fetchSchedules()
-    })
+      schedulesStore.fetchSchedules();
+    });
 
     return {
       filters,
@@ -167,8 +157,8 @@ export default {
       schedules,
       applyFilters,
       resetFilters,
-      goToDetail
-    }
-  }
-}
+      goToDetail,
+    };
+  },
+};
 </script>

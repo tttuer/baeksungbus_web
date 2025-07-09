@@ -4,8 +4,8 @@
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">시간표 관리</h1>
-          <p class="text-gray-600">버스 운행 시간표를 관리할 수 있습니다</p>
+          <h1 class="text-2xl font-bold text-gray-900">노선 관리</h1>
+          <p class="text-gray-600">버스 운행 노선를 관리할 수 있습니다</p>
         </div>
         <div class="flex space-x-3">
           <button
@@ -42,14 +42,14 @@
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            시간표 추가
+            노선 추가
           </button>
         </div>
       </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
           <div class="p-2 bg-blue-100 rounded-lg">
@@ -74,177 +74,13 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="p-2 bg-green-100 rounded-lg">
-            <svg
-              class="w-6 h-6 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">운행 중</p>
-            <p class="text-2xl font-bold text-gray-900">{{ activeRoutes }}</p>
-          </div>
-        </div>
-      </div>
 
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="p-2 bg-yellow-100 rounded-lg">
-            <svg
-              class="w-6 h-6 text-yellow-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">임시 중단</p>
-            <p class="text-2xl font-bold text-gray-900">
-              {{ suspendedRoutes }}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="p-2 bg-purple-100 rounded-lg">
-            <svg
-              class="w-6 h-6 text-purple-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">총 운행 횟수</p>
-            <p class="text-2xl font-bold text-gray-900">{{ totalTrips }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Search and Filters -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >검색</label
-          >
-          <div class="relative">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="노선명, 출발지, 도착지 검색"
-              class="form-input pl-10"
-              @keyup.enter="search"
-            />
-            <svg
-              class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >운행 상태</label
-          >
-          <select v-model="statusFilter" class="form-select">
-            <option value="">전체</option>
-            <option value="active">운행 중</option>
-            <option value="suspended">임시 중단</option>
-            <option value="inactive">운행 종료</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >노선 유형</label
-          >
-          <select v-model="typeFilter" class="form-select">
-            <option value="">전체</option>
-            <option value="regular">정규</option>
-            <option value="express">급행</option>
-            <option value="special">특수</option>
-          </select>
-        </div>
-
-        <div class="flex items-end space-x-2">
-          <button @click="search" class="btn btn-primary">
-            <svg
-              class="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-            검색
-          </button>
-          <button @click="resetFilters" class="btn btn-outline">
-            <svg
-              class="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            초기화
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Schedule Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
       <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">시간표 목록</h3>
+        <h3 class="text-lg font-medium text-gray-900">노선 목록</h3>
       </div>
 
       <div v-if="isLoading" class="flex items-center justify-center py-12">
@@ -272,9 +108,9 @@
           />
         </svg>
         <h3 class="text-lg font-medium text-gray-900 mb-2">
-          시간표가 없습니다
+          노선이 없습니다
         </h3>
-        <p class="text-gray-600">새 시간표를 추가해보세요.</p>
+        <p class="text-gray-600">새 노선을 추가해보세요.</p>
       </div>
 
       <div v-else class="overflow-x-auto">
@@ -289,17 +125,7 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                운행 구간
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                운행 시간
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                상태
+                링크
               </th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -329,9 +155,6 @@
                     <div class="text-sm font-medium text-gray-900">
                       {{ schedule.route_name }}
                     </div>
-                    <div class="text-sm text-gray-500">
-                      {{ schedule.route_type || "정규" }} 노선
-                    </div>
                   </div>
                 </div>
               </td>
@@ -352,104 +175,17 @@
                         d="M17 8l4 4m0 0l-4 4m4-4H3"
                       />
                     </svg>
-                    <span>{{ schedule.arrival }}</span>
+                    <span><a :href="schedule.url" target="_blank">{{ schedule.url }}</a></span>
                   </div>
                 </div>
-                <div class="text-sm text-gray-500">
-                  소요시간: {{ schedule.duration || "미설정" }}
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">
-                  <div>첫차: {{ schedule.first_bus || "미설정" }}</div>
-                  <div>막차: {{ schedule.last_bus || "미설정" }}</div>
-                  <div class="text-gray-500">
-                    배차간격: {{ schedule.interval || "미설정" }}
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span
-                  v-if="schedule.status === 'active'"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                >
-                  <svg
-                    class="w-3 h-3 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  운행 중
-                </span>
-                <span
-                  v-else-if="schedule.status === 'suspended'"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
-                >
-                  <svg
-                    class="w-3 h-3 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  임시 중단
-                </span>
-                <span
-                  v-else
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                >
-                  <svg
-                    class="w-3 h-3 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                  운행 종료
-                </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                  <button
-                    @click="viewSchedule(schedule)"
-                    class="text-blue-600 hover:text-blue-800"
-                  >
-                    상세보기
-                  </button>
                   <button
                     @click="editSchedule(schedule)"
                     class="text-indigo-600 hover:text-indigo-800"
                   >
                     수정
-                  </button>
-                  <button
-                    @click="toggleStatus(schedule)"
-                    :class="
-                      schedule.status === 'active'
-                        ? 'text-orange-600 hover:text-orange-800'
-                        : 'text-green-600 hover:text-green-800'
-                    "
-                  >
-                    {{ schedule.status === "active" ? "중단" : "운행" }}
                   </button>
                   <button
                     @click="deleteSchedule(schedule.id)"
@@ -557,7 +293,7 @@
       >
         <div class="p-6 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
-            {{ editingSchedule ? "시간표 수정" : "시간표 추가" }}
+            {{ editingSchedule ? "노선 수정" : "노선 추가" }}
           </h3>
         </div>
 
@@ -573,6 +309,7 @@
                 class="form-input"
                 placeholder="예: 142"
                 required
+                :disabled="editingSchedule"
               />
             </div>
           </div>
@@ -660,10 +397,7 @@ export default {
         }
     );
 
-    const totalRoutes = computed(() => {
-      if (!Array.isArray(schedules.value)) return 0;
-      return schedules.value.length;
-    });
+    const totalRoutes = computed(() => schedulesStore.totalCount);
 
     const activeRoutes = computed(() => {
       if (!Array.isArray(schedules.value)) return 0;
@@ -806,17 +540,17 @@ export default {
             editingSchedule.value.id,
             scheduleForm
           );
-          alert("시간표가 수정되었습니다.");
+          alert("노선이 수정되었습니다.");
         } else {
           await schedulesStore.createSchedule(scheduleForm);
-          alert("시간표가 추가되었습니다.");
+          alert("노선이 추가되었습니다.");
         }
 
         closeModal();
         await fetchSchedules();
       } catch (error) {
-        console.error("시간표 저장 실패:", error);
-        alert("시간표 저장에 실패했습니다.");
+        console.error("노선 저장 실패:", error);
+        alert("노선 저장에 실패했습니다.");
       } finally {
         isSubmitting.value = false;
       }
@@ -836,7 +570,7 @@ export default {
         });
 
         alert(
-          `시간표가 ${newStatus === "active" ? "운행 중" : "중단"}으로 변경되었습니다.`
+          `노선이 ${newStatus === "active" ? "운행 중" : "중단"}으로 변경되었습니다.`
         );
         await fetchSchedules();
       } catch (error) {
@@ -850,11 +584,11 @@ export default {
 
       try {
         await schedulesStore.deleteSchedule(id);
-        alert("시간표가 삭제되었습니다.");
+        alert("노선이 삭제되었습니다.");
         await fetchSchedules();
       } catch (error) {
-        console.error("시간표 삭제 실패:", error);
-        alert("시간표 삭제에 실패했습니다.");
+        console.error("노선 삭제 실패:", error);
+        alert("노선 삭제에 실패했습니다.");
       }
     };
 

@@ -6,12 +6,14 @@ export const useSchedulesStore = defineStore('schedules', () => {
   const schedules = ref([])
   const currentSchedule = ref(null)
   const isLoading = ref(false)
+  const totalCount = ref(0)
 
   const fetchSchedules = async (params = {}) => {
     try {
       isLoading.value = true
       const response = await api.get('/api/schedules', { params })
       schedules.value = response.data.items || response.data.schedules || response.data || []
+      totalCount.value = response.data.total_count || 0
     } catch (error) {
       console.error('스케줄 목록 조회 실패:', error)
       schedules.value = []
@@ -70,6 +72,7 @@ export const useSchedulesStore = defineStore('schedules', () => {
     schedules,
     currentSchedule,
     isLoading,
+    totalCount,
     fetchSchedules,
     fetchScheduleById,
     createSchedule,

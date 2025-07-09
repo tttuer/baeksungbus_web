@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/views/Home.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -79,41 +80,49 @@ const router = createRouter({
       name: 'admin',
       component: () => import('@/views/admin/AdminLayout.vue'),
       redirect: '/adm/dashboard',
+      meta: { requiresAuth: true },
       children: [
         {
           path: 'dashboard',
           name: 'admin-dashboard',
-          component: () => import('@/views/admin/Dashboard.vue')
+          component: () => import('@/views/admin/Dashboard.vue'),
+          meta: { requiresAuth: true }
         },
         {
           path: 'schedule',
           name: 'admin-schedule',
-          component: () => import('@/views/admin/Schedule.vue')
+          component: () => import('@/views/admin/Schedule.vue'),
+          meta: { requiresAuth: true }
         },
         {
           path: 'notice',
           name: 'admin-notice',
-          component: () => import('@/views/admin/Notice.vue')
+          component: () => import('@/views/admin/Notice.vue'),
+          meta: { requiresAuth: true }
         },
         {
           path: 'customer',
           name: 'admin-customer',
-          component: () => import('@/views/admin/Customer.vue')
+          component: () => import('@/views/admin/Customer.vue'),
+          meta: { requiresAuth: true }
         },
         {
           path: 'customer/:id',
           name: 'admin-customer-detail',
-          component: () => import('@/views/admin/CustomerDetail.vue')
+          component: () => import('@/views/admin/CustomerDetail.vue'),
+          meta: { requiresAuth: true }
         },
         {
           path: 'ddock',
           name: 'admin-ddock',
-          component: () => import('@/views/admin/Ddock.vue')
+          component: () => import('@/views/admin/Ddock.vue'),
+          meta: { requiresAuth: true }
         },
         {
           path: 'lost',
           name: 'admin-lost',
-          component: () => import('@/views/admin/Lost.vue')
+          component: () => import('@/views/admin/Lost.vue'),
+          meta: { requiresAuth: true }
         }
       ]
     },
@@ -123,6 +132,20 @@ const router = createRouter({
       component: () => import('@/views/admin/Login.vue')
     }
   ]
+})
+
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!authStore.isAuthenticated) {
+      next({ name: 'admin-login' })
+    } else {
+      next()
+    }
+  } else {
+    next()
+  }
 })
 
 export default router
