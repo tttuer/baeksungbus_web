@@ -102,9 +102,7 @@ export default {
     };
 
     const openKakaoMap = () => {
-      const url = `https://map.kakao.com/link/map/${encodeURIComponent(
-        companyInfo.name
-      )},${companyInfo.lat},${companyInfo.lng}`;
+      const url = `https://map.kakao.com/?itemId=1407011969`;
       window.open(url, "_blank");
     };
 
