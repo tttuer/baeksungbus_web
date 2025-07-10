@@ -2,7 +2,7 @@
   <div class="schedule">
     <!-- Page Header -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">버스 노선</h1>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">버스 운행 노선</h1>
       <p class="text-gray-600">백성운수 버스 운행 노선을 확인하세요</p>
     </div>
 

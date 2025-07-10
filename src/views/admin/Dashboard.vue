@@ -146,7 +146,7 @@
                   {{ qa.title }}
                 </h3>
                 <span
-                  v-if="qa.answered"
+                  v-if="qa.done"
                   class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded"
                 >
                   답변완료
