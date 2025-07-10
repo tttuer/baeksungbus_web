@@ -67,7 +67,7 @@
         class="flex flex-col md:flex-row justify-between items-start md:items-center"
       >
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">Q&A</h1>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">고객 문의</h1>
           <p class="text-gray-600">궁금한 점이나 건의사항을 문의해주세요</p>
         </div>
         <router-link to="/qa/form" class="btn btn-primary mt-4 md:mt-0">

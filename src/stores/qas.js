@@ -31,7 +31,7 @@ export const useQAsStore = defineStore("qas", () => {
     }
   };
 
-    const fetchAnsweredCount = async () => {
+  const fetchAnsweredCount = async () => {
     try {
       const response = await api.get("/api/qas", {
         params: {
@@ -79,7 +79,11 @@ export const useQAsStore = defineStore("qas", () => {
 
   const createQA = async (qaData) => {
     try {
-      const response = await api.post("/api/qas", qaData);
+      const response = await api.post("/api/qas", qaData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       await fetchQAs();
       return response.data;
     } catch (error) {
@@ -90,7 +94,11 @@ export const useQAsStore = defineStore("qas", () => {
 
   const updateQA = async (id, qaData) => {
     try {
-      const response = await api.put(`/api/qas/${id}`, qaData);
+      const response = await api.patch(`/api/qas/${id}`, qaData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       await fetchQAs();
       return response.data;
     } catch (error) {
