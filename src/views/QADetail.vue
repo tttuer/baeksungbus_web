@@ -150,7 +150,7 @@
       </div>
 
       <!-- Answer -->
-      <div v-if="qa.answer" class="card p-6">
+      <div v-if="qa.answers" class="card p-6">
         <div class="flex items-center mb-4">
           <div
             class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3"
@@ -170,46 +170,15 @@
             </svg>
           </div>
           <div>
-            <h2 class="text-lg font-semibold text-gray-900">관리자 답변</h2>
-            <p class="text-sm text-gray-500">
-              {{ formatDate(qa.answer.created_at) }}
-            </p>
+            <h2 class="text-lg font-semibold text-gray-900">백성운수(주)</h2>
           </div>
         </div>
 
         <div class="prose prose-lg max-w-none">
-          <div v-html="formatContent(qa.answer.content)"></div>
+          <div v-html="formatContent(qa.answers[0].content)"></div>
         </div>
 
         <!-- Answer Attachments -->
-        <div
-          v-if="qa.answer.file_name || qa.answer.file_data"
-          class="mt-4 pt-4 border-t border-gray-200"
-        >
-          <h4 class="font-medium mb-2">첨부파일</h4>
-          <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-            <svg
-              class="w-5 h-5 text-gray-400 mr-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-              />
-            </svg>
-            <span class="flex-1">{{ qa.answer.file_name }}</span>
-            <button
-              @click="downloadFile(qa.answer.file_data, qa.answer.file_name)"
-              class="text-primary-600 hover:text-primary-700 text-sm font-medium"
-            >
-              다운로드
-            </button>
-          </div>
-        </div>
       </div>
 
       <!-- No Answer Yet -->

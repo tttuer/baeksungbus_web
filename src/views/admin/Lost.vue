@@ -240,6 +240,12 @@
                     {{ item.done ? '처리중으로' : '완료처리' }}
                   </button>
                   <button
+                    @click="openAnswerModal(item)"
+                    class="text-green-600 hover:text-green-800"
+                  >
+                    {{ item.done ? '답변수정' : '답변하기' }}
+                  </button>
+                  <button
                     @click="contactOwner(item)"
                     class="text-purple-600 hover:text-purple-800"
                   >
@@ -414,15 +420,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Answer Modal -->
+    <AnswerModal
+      :show="showAnswerModal"
+      :qa="selectedQA"
+      @close="closeAnswerModal"
+      @answered="onAnswered"
+    />
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue'
 import { useQAsStore } from '@/stores/qas'
+import AnswerModal from '@/components/AnswerModal.vue'
 
 export default {
   name: 'AdminLost',
+  components: {
+    AnswerModal
+  },
   setup() {
     const qasStore = useQAsStore()
     
@@ -432,6 +450,8 @@ export default {
     const currentPage = ref(1)
     const showDetailModal = ref(false)
     const selectedItem = ref(null)
+    const showAnswerModal = ref(false)
+    const selectedQA = ref(null)
     
     const isLoading = computed(() => qasStore.isLoading)
     const lostItems = computed(() => qasStore.qas)
@@ -570,6 +590,20 @@ export default {
       selectedItem.value = null
     }
 
+    const openAnswerModal = (item) => {
+      selectedQA.value = item
+      showAnswerModal.value = true
+    }
+
+    const closeAnswerModal = () => {
+      showAnswerModal.value = false
+      selectedQA.value = null
+    }
+
+    const onAnswered = async () => {
+      await refreshData()
+    }
+
     const toggleStatus = async (item) => {
       try {
         const newStatus = !item.done
@@ -641,6 +675,8 @@ export default {
       todayCount,
       showDetailModal,
       selectedItem,
+      showAnswerModal,
+      selectedQA,
       formatDate,
       search,
       resetFilters,
@@ -649,6 +685,9 @@ export default {
       getPageNumbers,
       viewDetail,
       closeDetailModal,
+      openAnswerModal,
+      closeAnswerModal,
+      onAnswered,
       toggleStatus,
       contactOwner,
       deleteItem,

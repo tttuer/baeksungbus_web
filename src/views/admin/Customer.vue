@@ -356,11 +356,10 @@
                     상세보기
                   </router-link>
                   <button
-                    v-if="!inquiry.answered"
-                    @click="quickAnswer(inquiry)"
+                    @click="openAnswerModal(inquiry)"
                     class="text-green-600 hover:text-green-800"
                   >
-                    답변하기
+                    {{ inquiry.done ? '답변수정' : '답변하기' }}
                   </button>
                   <button
                     @click="deleteInquiry(inquiry.id)"
@@ -457,15 +456,27 @@
         </nav>
       </div>
     </div>
+
+    <!-- Answer Modal -->
+    <AnswerModal
+      :show="showAnswerModal"
+      :qa="selectedQA"
+      @close="closeAnswerModal"
+      @answered="onAnswered"
+    />
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from "vue";
 import { useQAsStore } from "@/stores/qas";
+import AnswerModal from "@/components/AnswerModal.vue";
 
 export default {
   name: "AdminCustomer",
+  components: {
+    AnswerModal
+  },
   setup() {
     const qasStore = useQAsStore();
 
@@ -473,6 +484,8 @@ export default {
     const answerStatus = ref("");
     const dateFilter = ref("");
     const currentPage = ref(1);
+    const showAnswerModal = ref(false);
+    const selectedQA = ref(null);
 
     const isLoading = computed(() => qasStore.isLoading);
     const customerInquiries = computed(() => qasStore.qas);
@@ -609,9 +622,19 @@ export default {
       return pages;
     };
 
-    const quickAnswer = (inquiry) => {
-      // 빠른 답변 모달이나 별도 페이지로 이동
-      alert(`${inquiry.title}에 대한 답변을 작성하세요.`);
+    const openAnswerModal = (inquiry) => {
+      console.log("openAnswerModal", inquiry);
+      selectedQA.value = inquiry;
+      showAnswerModal.value = true;
+    };
+
+    const closeAnswerModal = () => {
+      showAnswerModal.value = false;
+      selectedQA.value = null;
+    };
+
+    const onAnswered = async () => {
+      await refreshData();
     };
 
     const deleteInquiry = async (id) => {
@@ -642,13 +665,17 @@ export default {
       unansweredCount,
       answeredCount,
       todayCount,
+      showAnswerModal,
+      selectedQA,
       formatDate,
       search,
       resetFilters,
       refreshData,
       goToPage,
       getPageNumbers,
-      quickAnswer,
+      openAnswerModal,
+      closeAnswerModal,
+      onAnswered,
       deleteInquiry,
     };
   },
