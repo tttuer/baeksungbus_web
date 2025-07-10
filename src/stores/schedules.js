@@ -47,6 +47,17 @@ export const useSchedulesStore = defineStore('schedules', () => {
     }
   }
 
+  const createSchedules = async (schedulesData) => {
+    try {
+      const response = await api.post('/api/schedules', schedulesData)
+      await fetchSchedules()
+      return response.data
+    } catch (error) {
+      console.error('다중 스케줄 생성 실패:', error)
+      throw error
+    }
+  }
+
   const updateSchedule = async (id, scheduleData) => {
     try {
       const response = await api.put(`/api/schedules/${id}`, scheduleData)
@@ -76,6 +87,7 @@ export const useSchedulesStore = defineStore('schedules', () => {
     fetchSchedules,
     fetchScheduleById,
     createSchedule,
+    createSchedules,
     updateSchedule,
     deleteSchedule
   }

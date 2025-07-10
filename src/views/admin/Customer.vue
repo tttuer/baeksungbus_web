@@ -349,12 +349,6 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                  <router-link
-                    :to="`/adm/customer/${inquiry.id}`"
-                    class="text-blue-600 hover:text-blue-800"
-                  >
-                    상세보기
-                  </router-link>
                   <button
                     @click="openAnswerModal(inquiry)"
                     class="text-green-600 hover:text-green-800"
@@ -460,7 +454,7 @@
     <!-- Answer Modal -->
     <AnswerModal
       :show="showAnswerModal"
-      :qa="selectedQA"
+      :qaId="selectedQA?.id"
       @close="closeAnswerModal"
       @answered="onAnswered"
     />
@@ -623,7 +617,6 @@ export default {
     };
 
     const openAnswerModal = (inquiry) => {
-      console.log("openAnswerModal", inquiry);
       selectedQA.value = inquiry;
       showAnswerModal.value = true;
     };

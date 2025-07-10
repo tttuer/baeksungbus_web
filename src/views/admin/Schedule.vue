@@ -298,8 +298,9 @@
         </div>
 
         <form @submit.prevent="submitSchedule" class="p-6 space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
+          <!-- 단일 노선 생성 (수정 모드) -->
+          <div v-if="editingSchedule" class="flex gap-4 items-start">
+            <div class="w-32">
               <label class="block text-sm font-medium text-gray-700 mb-2"
                 >노선번호 *</label
               >
@@ -312,18 +313,81 @@
                 :disabled="editingSchedule"
               />
             </div>
+
+            <div class="flex-1">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >네이버 지도 링크</label
+              >
+              <input
+                v-model="scheduleForm.url"
+                type="text"
+                class="form-input"
+                placeholder="네이버 지도의 노선 검색 링크를 입력해주세요"
+              />
+            </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >네이버 지도 링크</label
-            >
-            <textarea
-              v-model="scheduleForm.url"
-              rows="3"
-              class="form-textarea"
-              placeholder="네이버 지도의 노선 검색 링크를 입력해주세요"
-            ></textarea>
+          <!-- 다중 노선 생성 (신규 생성 모드) -->
+          <div v-else>
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-md font-medium text-gray-900">노선 정보</h4>
+              <button
+                type="button"
+                @click="addRoute"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                노선 추가
+              </button>
+            </div>
+
+            <div class="space-y-4">
+              <div
+                v-for="(route, index) in routeList"
+                :key="index"
+                class="border border-gray-200 rounded-lg p-4 flex gap-4 items-start"
+              >
+                <div class="w-32">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >노선번호 *</label
+                  >
+                  <input
+                    v-model="route.route_number"
+                    type="text"
+                    class="form-input"
+                    placeholder="예: 142"
+                    required
+                  />
+                </div>
+
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >네이버 지도 링크</label
+                  >
+                  <input
+                    v-model="route.url"
+                    type="text"
+                    class="form-input"
+                    placeholder="네이버 지도의 노선 검색 링크를 입력해주세요"
+                  />
+                </div>
+
+                <div class="w-8 flex justify-center pt-8">
+                  <button
+                    v-if="routeList.length > 1"
+                    type="button"
+                    @click="removeRoute(index)"
+                    class="text-red-600 hover:text-red-800 p-1"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div
@@ -436,6 +500,13 @@ export default {
       url: "",
     });
 
+    const routeList = ref([
+      {
+        route_number: "",
+        url: "",
+      },
+    ]);
+
     const search = async () => {
       currentPage.value = 1;
       await fetchSchedules();
@@ -514,6 +585,12 @@ export default {
         route_number: "",
         url: "",
       });
+      routeList.value = [
+        {
+          route_number: "",
+          url: "",
+        },
+      ];
       showModal.value = true;
     };
 
@@ -531,19 +608,40 @@ export default {
       editingSchedule.value = null;
     };
 
+    const addRoute = () => {
+      routeList.value.push({
+        route_number: "",
+        url: "",
+      });
+    };
+
+    const removeRoute = (index) => {
+      if (routeList.value.length > 1) {
+        routeList.value.splice(index, 1);
+      }
+    };
+
     const submitSchedule = async () => {
       try {
         isSubmitting.value = true;
 
         if (editingSchedule.value) {
+          // 단일 노선 수정
           await schedulesStore.updateSchedule(
             editingSchedule.value.id,
             scheduleForm
           );
           alert("노선이 수정되었습니다.");
         } else {
-          await schedulesStore.createSchedule(scheduleForm);
-          alert("노선이 추가되었습니다.");
+          // 다중 노선 생성 - 배열로 한번에 전송
+          const validRoutes = routeList.value.filter(route => 
+            route.route_number.trim()
+          );
+          
+          if (validRoutes.length > 0) {
+            await schedulesStore.createSchedules(validRoutes);
+            alert(`${validRoutes.length}개의 노선이 추가되었습니다.`);
+          }
         }
 
         closeModal();
@@ -611,6 +709,7 @@ export default {
       editingSchedule,
       isSubmitting,
       scheduleForm,
+      routeList,
       search,
       resetFilters,
       refreshData,
@@ -619,6 +718,8 @@ export default {
       openCreateModal,
       editSchedule,
       closeModal,
+      addRoute,
+      removeRoute,
       submitSchedule,
       viewSchedule,
       toggleStatus,

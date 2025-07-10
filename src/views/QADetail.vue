@@ -150,7 +150,7 @@
       </div>
 
       <!-- Answer -->
-      <div v-if="qa.answers" class="card p-6">
+      <div v-if="qa.answers.length > 0" class="card p-6">
         <div class="flex items-center mb-4">
           <div
             class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3"
@@ -175,7 +175,7 @@
         </div>
 
         <div class="prose prose-lg max-w-none">
-          <div v-html="formatContent(qa.answers[0].content)"></div>
+          <div v-html="formatContent(qa.answers?.[0]?.content)"></div>
         </div>
 
         <!-- Answer Attachments -->

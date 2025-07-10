@@ -51,7 +51,7 @@
             class="text-white hover:text-primary-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             active-class="bg-primary-700"
           >
-            Q&A
+            고객 문의
           </router-link>
           <router-link 
             to="/lost" 

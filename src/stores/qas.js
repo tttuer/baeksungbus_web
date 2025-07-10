@@ -110,7 +110,7 @@ export const useQAsStore = defineStore("qas", () => {
   const deleteQA = async (id) => {
     try {
       await api.delete(`/api/qas/${id}`);
-      await fetchQAs();
+      // await fetchQAs();
     } catch (error) {
       console.error("Q&A 삭제 실패:", error);
       throw error;
