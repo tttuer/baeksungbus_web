@@ -79,7 +79,7 @@
             관리자
           </router-link>
           <button 
-            v-if="isAuthenticated" 
+            v-if="isAuthenticated && isAdmin" 
             @click="logout" 
             class="text-white hover:text-primary-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           >
@@ -179,6 +179,7 @@
               관리자
             </router-link>
             <button 
+              v-if="isAdmin"
               @click="logout" 
               class="text-white hover:text-primary-200 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
             >

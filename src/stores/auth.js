@@ -53,10 +53,44 @@ export const useAuthStore = defineStore("auth", () => {
     }
   };
 
-  const logout = () => {
-    token.value = null;
-    user.value = null;
-    localStorage.removeItem("token");
+  const logout = async () => {
+    try {
+      if (token.value) {
+        await api.post("/api/users/logout");
+      }
+    } catch (error) {
+      console.error("로그아웃 API 호출 실패:", error);
+    } finally {
+      token.value = null;
+      user.value = null;
+      localStorage.removeItem("token");
+    }
+  };
+
+  const isTokenExpired = () => {
+    if (!token.value) return true;
+    
+    try {
+      const payload = JSON.parse(atob(token.value.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      console.log("토큰 만료 확인:", {
+        expires: payload.expires,
+        currentTime: currentTime,
+        isExpired: payload.expires < currentTime
+      });
+      return payload.expires < currentTime;
+    } catch (error) {
+      console.error("토큰 파싱 오류:", error);
+      return true;
+    }
+  };
+
+  const checkTokenAndLogout = async () => {
+    if (isTokenExpired()) {
+      await logout();
+      return true;
+    }
+    return false;
   };
 
   const getUserInfo = async () => {
@@ -71,6 +105,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const initAuth = async () => {
     if (token.value) {
+      // getUserInfo 호출 제거 - API가 없으므로
     }
   };
 
@@ -84,5 +119,7 @@ export const useAuthStore = defineStore("auth", () => {
     logout,
     getUserInfo,
     initAuth,
+    isTokenExpired,
+    checkTokenAndLogout,
   };
 });

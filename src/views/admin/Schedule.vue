@@ -73,8 +73,6 @@
           </div>
         </div>
       </div>
-
-
     </div>
 
     <!-- Schedule Table -->
@@ -107,9 +105,7 @@
             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
-          노선이 없습니다
-        </h3>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">노선이 없습니다</h3>
         <p class="text-gray-600">새 노선을 추가해보세요.</p>
       </div>
 
@@ -175,7 +171,11 @@
                         d="M17 8l4 4m0 0l-4 4m4-4H3"
                       />
                     </svg>
-                    <span><a :href="schedule.url" target="_blank">{{ schedule.url }}</a></span>
+                    <span
+                      ><a :href="schedule.url" target="_blank">{{
+                        schedule.url
+                      }}</a></span
+                    >
                   </div>
                 </div>
               </td>
@@ -295,6 +295,23 @@
           <h3 class="text-lg font-semibold text-gray-900">
             {{ editingSchedule ? "노선 수정" : "노선 추가" }}
           </h3>
+          <a href="https://map.naver.com/p?c=15.00,0,0,0,dh" target="_blank" class="flex items-center gap-1">
+            네이버 지도 바로가기
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="size-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+              />
+            </svg>
+          </a>
         </div>
 
         <form @submit.prevent="submitSchedule" class="p-6 space-y-6">
@@ -336,8 +353,18 @@
                 @click="addRoute"
                 class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <svg
+                  class="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 노선 추가
               </button>
@@ -381,8 +408,18 @@
                     @click="removeRoute(index)"
                     class="text-red-600 hover:text-red-800 p-1"
                   >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -634,10 +671,10 @@ export default {
           alert("노선이 수정되었습니다.");
         } else {
           // 다중 노선 생성 - 배열로 한번에 전송
-          const validRoutes = routeList.value.filter(route => 
+          const validRoutes = routeList.value.filter((route) =>
             route.route_number.trim()
           );
-          
+
           if (validRoutes.length > 0) {
             await schedulesStore.createSchedules(validRoutes);
             alert(`${validRoutes.length}개의 노선이 추가되었습니다.`);

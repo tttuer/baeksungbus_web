@@ -138,6 +138,8 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
   if (to.matched.some(record => record.meta.requiresAuth)) {
+    await authStore.checkTokenAndLogout()
+    
     if (!authStore.isAuthenticated) {
       next({ name: 'admin-login' })
     } else {
