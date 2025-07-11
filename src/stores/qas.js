@@ -15,6 +15,7 @@ export const useQAsStore = defineStore("qas", () => {
   const unansweredTotal = ref(0);
   const answeredTotal = ref(0);
   const unansweredLostTotal = ref(0);
+  const answeredLostTotal = ref(0);
 
 
   const fetchUnansweredCount = async () => {
@@ -43,7 +44,6 @@ export const useQAsStore = defineStore("qas", () => {
           page: 1,
         },
       });
-      console.log("미답변 분실물 수:", response.data.pagination.total);
       unansweredLostTotal.value = response.data.pagination.total;
     } catch (error) {
       console.error("미답변 수 조회 실패:", error);
@@ -61,6 +61,22 @@ export const useQAsStore = defineStore("qas", () => {
         },
       });
       answeredTotal.value = response.data.pagination.total;
+    } catch (error) {
+      console.error("미답변 수 조회 실패:", error);
+    }
+  };
+
+    const fetchAnsweredLostCount = async () => {
+    try {
+      const response = await api.get("/api/qas", {
+        params: {
+          qa_type: "LOST",
+          done: true,
+          page_size: 1, // 실제 데이터는 필요 없고, pagination.total만 필요함
+          page: 1,
+        },
+      });
+      answeredLostTotal.value = response.data.pagination.total;
     } catch (error) {
       console.error("미답변 수 조회 실패:", error);
     }
@@ -144,6 +160,7 @@ export const useQAsStore = defineStore("qas", () => {
     unansweredTotal,
     answeredTotal,
     unansweredLostTotal,
+    answeredLostTotal,
     fetchQAs,
     fetchQAById,
     createQA,
@@ -152,5 +169,6 @@ export const useQAsStore = defineStore("qas", () => {
     fetchUnansweredCount,
     fetchAnsweredCount,
     fetchUnansweredLostCount,
+    fetchAnsweredLostCount,
   };
 });

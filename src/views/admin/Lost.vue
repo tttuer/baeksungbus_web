@@ -643,13 +643,9 @@ export default {
         }
     );
 
-    const processingCount = computed(
-      () => lostItems.value.filter((item) => !item.done).length
-    );
+    const processingCount = computed(() => qasStore.unansweredLostTotal);
 
-    const completedCount = computed(
-      () => lostItems.value.filter((item) => item.done).length
-    );
+    const completedCount = computed(() => qasStore.answeredLostTotal);
 
     const todayCount = computed(() => {
       const today = new Date().toDateString();
@@ -684,6 +680,8 @@ export default {
 
     const refreshData = async () => {
       await fetchLostItems();
+      await qasStore.fetchUnansweredLostCount();
+      await qasStore.fetchAnsweredLostCount();
     };
 
     const fetchLostItems = async () => {
@@ -852,6 +850,8 @@ export default {
 
     onMounted(() => {
       fetchLostItems();
+      qasStore.fetchUnansweredLostCount();
+      qasStore.fetchAnsweredLostCount();
     });
 
     return {
