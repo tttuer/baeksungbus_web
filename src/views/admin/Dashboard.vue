@@ -47,12 +47,12 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
               />
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">미답변 문의</p>
+            <p class="text-sm font-medium text-gray-600">미답변 고객 문의</p>
             <p class="text-2xl font-bold text-gray-900">
               {{ stats.unansweredQAs || 0 }}
             </p>
@@ -62,9 +62,9 @@
 
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
-          <div class="p-2 bg-yellow-100 rounded-lg">
+          <div class="p-2 bg-blue-100 rounded-lg">
             <svg
-              class="w-6 h-6 text-yellow-600"
+              class="w-6 h-6 text-blue-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -88,9 +88,9 @@
 
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
-          <div class="p-2 bg-green-100 rounded-lg">
+          <div class="p-2 bg-red-100 rounded-lg">
             <svg
-              class="w-6 h-6 text-green-600"
+              class="w-6 h-6 text-red-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -99,14 +99,14 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">공지사항</p>
+            <p class="text-sm font-medium text-gray-600">미답변 분실물 신고</p>
             <p class="text-2xl font-bold text-gray-900">
-              {{ stats.totalNotices || 0 }}
+              {{ stats.unansweredLosts || 0 }}
             </p>
           </div>
         </div>
@@ -351,6 +351,7 @@ export default {
       totalQAs: 0,
       unansweredQAs: 0,
       totalLostItems: 0,
+      unansweredLosts: 0,
       totalNotices: 0,
     });
 
@@ -385,12 +386,18 @@ export default {
           done: false,
         });
 
-        stats.unansweredQAs = qasStore.pagination?.total || 0;
+        await qasStore.fetchUnansweredCount();
+        stats.unansweredQAs = qasStore.unansweredTotal;
 
         // 분실물 데이터 로드
         await qasStore.fetchQAs({ qa_type: "LOST", page: 1, page_size: 5 });
+        
         recentLostItems.value = qasStore.qas.slice(0, 5);
         stats.totalLostItems = qasStore.pagination?.total || 0;
+
+        await qasStore.fetchUnansweredLostCount();
+        stats.unansweredLosts = qasStore.unansweredLostTotal;
+
 
         // 공지사항 데이터 로드
         await noticesStore.fetchNotices({ page: 1, page_size: 1 });

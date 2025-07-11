@@ -403,13 +403,13 @@ export default {
     const selectedItemId = ref(null);
 
     const getStatusClass = (status) => {
-      return status === false
+      return status === true
         ? "bg-green-100 text-green-800"
-        : "bg-gray-100 text-gray-800";
+        : "bg-yellow-100 text-yellow-800";
     };
 
     const getStatusLabel = (status) => {
-      return status === false ? "처리중" : "처리완료";
+      return status === true ? "답변완료" : "답변대기";
     };
 
     const formatDate = (dateString) => {

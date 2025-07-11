@@ -395,7 +395,7 @@ export default {
     });
 
     const getStatusClass = (status) => {
-      return status === "answered"
+      return status === true
         ? "bg-green-100 text-green-800"
         : "bg-yellow-100 text-yellow-800";
     };
