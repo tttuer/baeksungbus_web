@@ -73,11 +73,6 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const payload = JSON.parse(atob(token.value.split('.')[1]));
       const currentTime = Date.now() / 1000;
-      console.log("토큰 만료 확인:", {
-        expires: payload.expires,
-        currentTime: currentTime,
-        isExpired: payload.expires < currentTime
-      });
       return payload.expires < currentTime;
     } catch (error) {
       console.error("토큰 파싱 오류:", error);

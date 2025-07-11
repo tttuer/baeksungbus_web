@@ -54,9 +54,9 @@
             </svg>
           </div>
           <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">전체 신고</p>
+            <p class="text-sm font-medium text-gray-600">전체 분실물 신고</p>
             <p class="text-2xl font-bold text-gray-900">
-              {{ pagination.total || 0 }}
+              {{ totalCount }}
             </p>
           </div>
         </div>
@@ -64,9 +64,9 @@
 
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
-          <div class="p-2 bg-green-100 rounded-lg">
+          <div class="p-2 bg-red-100 rounded-lg">
             <svg
-              class="w-6 h-6 text-green-600"
+              class="w-6 h-6 text-red-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -75,7 +75,7 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
           </div>
@@ -90,9 +90,9 @@
 
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
-          <div class="p-2 bg-gray-100 rounded-lg">
+          <div class="p-2 bg-green-100 rounded-lg">
             <svg
-              class="w-6 h-6 text-gray-600"
+              class="w-6 h-6 text-green-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -116,7 +116,7 @@
     <!-- Search and Filters -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
+        <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-2"
             >검색</label
           >
@@ -152,18 +152,6 @@
             <option value="">전체</option>
             <option value="false">처리 중</option>
             <option value="true">처리 완료</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >기간</label
-          >
-          <select v-model="dateFilter" class="form-select">
-            <option value="">전체</option>
-            <option value="today">오늘</option>
-            <option value="week">일주일</option>
-            <option value="month">한달</option>
           </select>
         </div>
 
@@ -643,6 +631,8 @@ export default {
         }
     );
 
+    const totalCount = computed(() => qasStore.totalLostCount);
+
     const processingCount = computed(() => qasStore.unansweredLostTotal);
 
     const completedCount = computed(() => qasStore.answeredLostTotal);
@@ -682,6 +672,7 @@ export default {
       await fetchLostItems();
       await qasStore.fetchUnansweredLostCount();
       await qasStore.fetchAnsweredLostCount();
+      await qasStore.fetchLostTotalCount();
     };
 
     const fetchLostItems = async () => {
@@ -831,7 +822,7 @@ export default {
       try {
         await qasStore.deleteQA(id);
         alert("분실물 신고가 삭제되었습니다.");
-        await fetchLostItems();
+        await refreshData();
       } catch (error) {
         console.error("삭제 실패:", error);
         alert("삭제에 실패했습니다.");
@@ -852,6 +843,7 @@ export default {
       fetchLostItems();
       qasStore.fetchUnansweredLostCount();
       qasStore.fetchAnsweredLostCount();
+      qasStore.fetchLostTotalCount();
     });
 
     return {
@@ -868,6 +860,7 @@ export default {
       selectedItem,
       showAnswerModal,
       selectedQA,
+      totalCount,
       formatDate,
       search,
       resetFilters,

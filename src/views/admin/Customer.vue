@@ -56,7 +56,7 @@
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-600">전체 문의</p>
             <p class="text-2xl font-bold text-gray-900">
-              {{ pagination.total || 0 }}
+              {{ totalCount }}
             </p>
           </div>
         </div>
@@ -118,7 +118,7 @@
     <!-- Search and Filters -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
+        <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-2"
             >검색</label
           >
@@ -154,18 +154,6 @@
             <option value="">전체</option>
             <option value="false">미답변</option>
             <option value="true">답변완료</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >기간</label
-          >
-          <select v-model="dateFilter" class="form-select">
-            <option value="">전체</option>
-            <option value="today">오늘</option>
-            <option value="week">일주일</option>
-            <option value="month">한달</option>
           </select>
         </div>
 
@@ -492,7 +480,8 @@ export default {
           totalPages: 1,
         }
     );
-
+    
+    const totalCount = computed(() => qasStore.totalCustomerCount);
     const unansweredCount = computed(() => qasStore.unansweredTotal)
     const answeredCount = computed(() => qasStore.answeredTotal)
 
@@ -531,6 +520,7 @@ export default {
       await fetchCustomerInquiries();
       await qasStore.fetchUnansweredCount()
       await qasStore.fetchAnsweredCount();
+      await qasStore.fetchCustomerTotalCount();
     };
 
     const fetchCustomerInquiries = async () => {
@@ -634,7 +624,7 @@ export default {
       if (confirm("정말 삭제하시겠습니까?")) {
         try {
           await qasStore.deleteQA(id);
-          await fetchCustomerInquiries();
+          await refreshData();
           alert("삭제되었습니다.");
         } catch (error) {
           alert("삭제에 실패했습니다.");
@@ -646,6 +636,7 @@ export default {
       fetchCustomerInquiries();
       qasStore.fetchUnansweredCount()
       qasStore.fetchAnsweredCount();
+      qasStore.fetchCustomerTotalCount();
     });
 
     return {
@@ -660,6 +651,7 @@ export default {
       todayCount,
       showAnswerModal,
       selectedQA,
+      totalCount,
       formatDate,
       search,
       resetFilters,

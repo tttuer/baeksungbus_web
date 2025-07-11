@@ -16,7 +16,38 @@ export const useQAsStore = defineStore("qas", () => {
   const answeredTotal = ref(0);
   const unansweredLostTotal = ref(0);
   const answeredLostTotal = ref(0);
+  const totalCustomerCount = ref(0);
+  const totalLostCount = ref(0);
 
+  const fetchCustomerTotalCount = async () => {
+    try {
+      const response = await api.get("/api/qas", {
+        params: {
+          qa_type: "CUSTOMER",
+          page_size: 1, // 실제 데이터는 필요 없고, pagination.total만 필요함
+          page: 1,
+        },
+      });
+      totalCustomerCount.value = response.data.pagination.total;
+    } catch (error) {
+      console.error("미답변 수 조회 실패:", error);
+    }
+  };
+
+  const fetchLostTotalCount = async () => {
+    try {
+      const response = await api.get("/api/qas", {
+        params: {
+          qa_type: "LOST",
+          page_size: 1, // 실제 데이터는 필요 없고, pagination.total만 필요함
+          page: 1,
+        },
+      });
+      totalLostCount.value = response.data.pagination.total;
+    } catch (error) {
+      console.error("미답변 수 조회 실패:", error);
+    }
+  };
 
   const fetchUnansweredCount = async () => {
     try {
@@ -66,7 +97,7 @@ export const useQAsStore = defineStore("qas", () => {
     }
   };
 
-    const fetchAnsweredLostCount = async () => {
+  const fetchAnsweredLostCount = async () => {
     try {
       const response = await api.get("/api/qas", {
         params: {
@@ -116,7 +147,7 @@ export const useQAsStore = defineStore("qas", () => {
     try {
       const response = await api.post("/api/qas", qaData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       await fetchQAs();
@@ -131,7 +162,7 @@ export const useQAsStore = defineStore("qas", () => {
     try {
       const response = await api.patch(`/api/qas/${id}`, qaData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       await fetchQAs();
@@ -161,6 +192,8 @@ export const useQAsStore = defineStore("qas", () => {
     answeredTotal,
     unansweredLostTotal,
     answeredLostTotal,
+    totalCustomerCount,
+    totalLostCount,
     fetchQAs,
     fetchQAById,
     createQA,
@@ -170,5 +203,7 @@ export const useQAsStore = defineStore("qas", () => {
     fetchAnsweredCount,
     fetchUnansweredLostCount,
     fetchAnsweredLostCount,
+    fetchCustomerTotalCount,
+    fetchLostTotalCount,
   };
 });
