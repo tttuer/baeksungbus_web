@@ -83,14 +83,14 @@ export const useNoticesStore = defineStore("notices", () => {
   const updateNotice = async (id, noticeData) => {
     try {
       console.log("updateNotice received data:", noticeData);
-      
+
       const formData = new FormData();
-      
-      formData.append('title', noticeData.title || '');
-      formData.append('content', noticeData.content || '');
-      
+
+      formData.append("title", noticeData.title || "");
+      formData.append("content", noticeData.content || "");
+
       if (noticeData.file) {
-        formData.append('attachment', noticeData.file);
+        formData.append("attachment", noticeData.file);
       }
 
       // FormData 내용 확인
@@ -121,6 +121,15 @@ export const useNoticesStore = defineStore("notices", () => {
     }
   };
 
+  const updateNoticeReadCnt = async (id) => {
+    try {
+      await api.patch(`/api/notices/${id}/read`);
+    } catch (error) {
+      console.error("공지사항 조회수 업데이트 실패:", error);
+      throw error;
+    }
+  };
+
   return {
     notices,
     currentNotice,
@@ -131,5 +140,6 @@ export const useNoticesStore = defineStore("notices", () => {
     createNotice,
     updateNotice,
     deleteNotice,
+    updateNoticeReadCnt,
   };
 });
