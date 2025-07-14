@@ -5,7 +5,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold text-gray-900">노선 관리</h1>
-          <p class="text-gray-600">버스 운행 노선를 관리할 수 있습니다</p>
+          <p class="text-gray-600">버스 운행 노선을 관리할 수 있습니다</p>
         </div>
         <div class="flex space-x-3">
           <button
@@ -295,7 +295,7 @@
           <h3 class="text-lg font-semibold text-gray-900">
             {{ editingSchedule ? "노선 수정" : "노선 추가" }}
           </h3>
-          <a href="https://map.naver.com/p?c=15.00,0,0,0,dh" target="_blank" class="flex items-center gap-1">
+          <a href="https://map.naver.com/p?c=15.00,0,0,0,dh" target="_blank" class="flex items-center gap-1 text-blue-600">
             네이버 지도 바로가기
             <svg
               xmlns="http://www.w3.org/2000/svg"

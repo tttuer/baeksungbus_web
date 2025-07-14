@@ -153,21 +153,13 @@
       <div v-if="qa.answers.length > 0" class="card p-6">
         <div class="flex items-center mb-4">
           <div
-            class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3"
+            class="w-6 h-6 bg-white rounded-full flex items-center justify-center mr-1"
           >
-            <svg
-              class="w-5 h-5 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <img
+              src="@/assets/logo.png"
+              alt="백성운수 로고"
+              class="w-5 h-5"
+            />
           </div>
           <div>
             <h2 class="text-lg font-semibold text-gray-900">백성운수(주)</h2>
