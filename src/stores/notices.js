@@ -48,18 +48,18 @@ export const useNoticesStore = defineStore("notices", () => {
   const createNotice = async (noticeData) => {
     try {
       console.log("createNotice received data:", noticeData);
-      
+
       const formData = new FormData();
-      
+
       console.log("Adding title:", noticeData.title);
       console.log("Adding content:", noticeData.content);
       console.log("Adding file:", noticeData.file);
-      
-      formData.append('title', noticeData.title || '');
-      formData.append('content', noticeData.content || '');
-      
+
+      formData.append("title", noticeData.title || "");
+      formData.append("content", noticeData.content || "");
+
       if (noticeData.file) {
-        formData.append('attachment', noticeData.file);
+        formData.append("attachment", noticeData.file);
       }
 
       // FormData 내용 확인
@@ -82,7 +82,27 @@ export const useNoticesStore = defineStore("notices", () => {
 
   const updateNotice = async (id, noticeData) => {
     try {
-      const response = await api.put(`/api/notices/${id}`, noticeData);
+      console.log("updateNotice received data:", noticeData);
+      
+      const formData = new FormData();
+      
+      formData.append('title', noticeData.title || '');
+      formData.append('content', noticeData.content || '');
+      
+      if (noticeData.file) {
+        formData.append('attachment', noticeData.file);
+      }
+
+      // FormData 내용 확인
+      for (let [key, value] of formData.entries()) {
+        console.log(`FormData ${key}:`, value);
+      }
+
+      const response = await api.patch(`/api/notices/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       await fetchNotices();
       return response.data;
     } catch (error) {

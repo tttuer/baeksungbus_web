@@ -154,7 +154,7 @@
     <!-- Search and Filters -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
+        <div class="col-span-3">
           <label class="block text-sm font-medium text-gray-700 mb-2"
             >검색</label
           >
@@ -180,28 +180,6 @@
               />
             </svg>
           </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >공개 상태</label
-          >
-          <select v-model="publishStatus" class="form-select">
-            <option value="">전체</option>
-            <option value="true">공개</option>
-            <option value="false">비공개</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >중요도</label
-          >
-          <select v-model="importanceFilter" class="form-select">
-            <option value="">전체</option>
-            <option value="true">중요</option>
-            <option value="false">일반</option>
-          </select>
         </div>
 
         <div class="flex items-end space-x-2">
@@ -299,11 +277,6 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                상태
-              </th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
                 조회수
               </th>
               <th
@@ -353,74 +326,17 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ formatDate(notice.c_date) }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex flex-col space-y-1">
-                  <span
-                    v-if="notice.published"
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                  >
-                    <svg
-                      class="w-3 h-3 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    공개
-                  </span>
-                  <span
-                    v-else
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                  >
-                    <svg
-                      class="w-3 h-3 mr-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                      />
-                    </svg>
-                    비공개
-                  </span>
-                </div>
-              </td>
+
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {{ notice.views || 0 }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
                   <button
-                    @click="viewNotice(notice)"
-                    class="text-blue-600 hover:text-blue-800"
-                  >
-                    보기
-                  </button>
-                  <button
                     @click="editNotice(notice)"
                     class="text-indigo-600 hover:text-indigo-800"
                   >
                     수정
-                  </button>
-                  <button
-                    @click="togglePublish(notice)"
-                    :class="
-                      notice.published
-                        ? 'text-orange-600 hover:text-orange-800'
-                        : 'text-green-600 hover:text-green-800'
-                    "
-                  >
-                    {{ notice.published ? "비공개" : "공개" }}
                   </button>
                   <button
                     @click="deleteNotice(notice.id)"
@@ -582,7 +498,52 @@
               JPG, PNG 파일만 업로드 가능 (최대 10MB)
             </p>
 
-            <!-- File Preview -->
+            <!-- Existing File Preview -->
+            <div
+              v-if="noticeForm.existingAttachmentFilename && !noticeForm.file"
+              class="mt-3 p-3 bg-blue-50 rounded-lg flex items-center justify-between"
+            >
+              <div class="flex items-center">
+                <svg
+                  class="w-5 h-5 text-blue-400 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                  />
+                </svg>
+                <span class="text-sm text-gray-700">{{
+                  noticeForm.existingAttachmentFilename
+                }}</span>
+                <span class="text-sm text-blue-600 ml-2">(기존 파일)</span>
+              </div>
+              <button
+                type="button"
+                @click="removeExistingFile"
+                class="text-red-600 hover:text-red-700"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- New File Preview -->
             <div
               v-if="noticeForm.file"
               class="mt-3 p-3 bg-gray-50 rounded-lg flex items-center justify-between"
@@ -720,6 +681,8 @@ export default {
       title: "",
       content: "",
       file: null,
+      existingAttachment: null,
+      existingAttachmentFilename: null,
     });
 
     const handleFileUpload = (event) => {
@@ -751,6 +714,11 @@ export default {
       if (fileInput) {
         fileInput.value = "";
       }
+    };
+
+    const removeExistingFile = () => {
+      noticeForm.existingAttachment = null;
+      noticeForm.existingAttachmentFilename = null;
     };
 
     const formatFileSize = (bytes) => {
@@ -852,18 +820,32 @@ export default {
         title: "",
         content: "",
         file: null,
+        existingAttachment: null,
+        existingAttachmentFilename: null,
       });
       showModal.value = true;
     };
 
-    const editNotice = (notice) => {
-      editingNotice.value = notice;
-      Object.assign(noticeForm, {
-        title: notice.title,
-        content: notice.content,
-        file: null,
-      });
-      showModal.value = true;
+    const editNotice = async (notice) => {
+      try {
+        editingNotice.value = notice;
+        
+        // ID로 공지사항 전체 데이터 불러오기 (첨부파일 정보 포함)
+        const fullNotice = await noticesStore.fetchNoticeById(notice.id);
+        
+        Object.assign(noticeForm, {
+          title: fullNotice.title,
+          content: fullNotice.content,
+          file: null, // 새로 업로드할 파일
+          existingAttachment: fullNotice.attachment,
+          existingAttachmentFilename: fullNotice.attachment_filename,
+        });
+        
+        showModal.value = true;
+      } catch (error) {
+        console.error("공지사항 로드 실패:", error);
+        alert("공지사항을 불러오는데 실패했습니다.");
+      }
     };
 
     const closeModal = () => {
@@ -964,6 +946,7 @@ export default {
       deleteNotice,
       handleFileUpload,
       removeFile,
+      removeExistingFile,
       formatFileSize,
     };
   },
