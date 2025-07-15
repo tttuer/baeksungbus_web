@@ -130,16 +130,12 @@
 
         <!-- Question Attachments (Images) -->
         <div v-if="qa.attachment_filename && qa.attachment" class="mb-6">
-          <h4 class="font-medium mb-3">첨부 이미지</h4>
           <div class="bg-gray-50 rounded-lg p-4">
             <img
               :src="getImageUrl(qa.attachment)"
               :alt="qa.attachment_filename"
-              class="max-w-md max-h-80 object-contain rounded-lg shadow-sm"
+              class="max-w-7/10 max-h-7/10 object-contain rounded-lg shadow-sm"
             />
-            <p class="text-sm text-gray-500 mt-2">
-              {{ qa.attachment_filename }}
-            </p>
           </div>
         </div>
 
@@ -155,11 +151,7 @@
           <div
             class="w-6 h-6 bg-white rounded-full flex items-center justify-center mr-1"
           >
-            <img
-              src="@/assets/logo.png"
-              alt="백성운수 로고"
-              class="w-5 h-5"
-            />
+            <img src="@/assets/logo.png" alt="백성운수 로고" class="w-5 h-5" />
           </div>
           <div>
             <h2 class="text-lg font-semibold text-gray-900">백성운수(주)</h2>
@@ -261,87 +253,6 @@
             </button>
           </div>
         </form>
-      </div>
-
-      <!-- Navigation -->
-      <div class="card p-6">
-        <h3 class="text-lg font-semibold mb-4">다른 Q&A</h3>
-        <div class="space-y-3">
-          <!-- Previous QA -->
-          <div
-            v-if="previousQA"
-            class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <div class="flex items-center flex-1">
-              <svg
-                class="w-4 h-4 text-gray-400 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              <div>
-                <p class="text-sm text-gray-500">이전글</p>
-                <router-link
-                  :to="`/qa/${previousQA.id}`"
-                  class="text-gray-900 hover:text-primary-600 font-medium"
-                >
-                  {{ previousQA.title }}
-                </router-link>
-              </div>
-            </div>
-            <span class="text-sm text-gray-500">{{
-              formatDate(previousQA.created_at)
-            }}</span>
-          </div>
-
-          <!-- Next QA -->
-          <div
-            v-if="nextQA"
-            class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <div class="flex items-center flex-1">
-              <svg
-                class="w-4 h-4 text-gray-400 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-              <div>
-                <p class="text-sm text-gray-500">다음글</p>
-                <router-link
-                  :to="`/qa/${nextQA.id}`"
-                  class="text-gray-900 hover:text-primary-600 font-medium"
-                >
-                  {{ nextQA.title }}
-                </router-link>
-              </div>
-            </div>
-            <span class="text-sm text-gray-500">{{
-              formatDate(nextQA.created_at)
-            }}</span>
-          </div>
-
-          <div
-            v-if="!previousQA && !nextQA"
-            class="text-center py-4 text-gray-500"
-          >
-            다른 Q&A가 없습니다.
-          </div>
-        </div>
       </div>
 
       <!-- Action Buttons -->
