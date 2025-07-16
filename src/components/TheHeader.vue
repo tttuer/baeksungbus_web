@@ -4,7 +4,7 @@
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center">
           <router-link to="/" class="flex items-center space-x-3">
-            <img src="@/assets/logo.png" alt="백성운수" class="h-10 w-10 rounded">
+            <img src="@/assets/favicon.ico" alt="백성운수" class="h-10 w-10 rounded">
             <span class="text-xl font-bold">백성운수(주)</span>
           </router-link>
         </div>
