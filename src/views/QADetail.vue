@@ -151,7 +151,7 @@
           <div
             class="w-6 h-6 bg-white rounded-full flex items-center justify-center mr-1"
           >
-            <img src="@/assets/logo.png" alt="백성운수 로고" class="w-5 h-5" />
+            <img src="@/assets/favicon.ico" alt="백성운수 로고" class="w-5 h-5" />
           </div>
           <div>
             <h2 class="text-lg font-semibold text-gray-900">백성운수(주)</h2>
