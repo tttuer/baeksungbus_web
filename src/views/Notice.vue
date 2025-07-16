@@ -36,17 +36,6 @@
             </svg>
           </div>
         </div>
-        <div class="w-full md:w-48">
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >분류</label
-          >
-          <select v-model="selectedType" class="form-select">
-            <option value="">전체</option>
-            <option value="NOTICE">일반공지</option>
-            <option value="TIME">시간표</option>
-            <option value="TTOCK">정류장</option>
-          </select>
-        </div>
         <div class="flex items-end gap-2">
           <button @click="search" class="btn btn-primary">
             <svg
