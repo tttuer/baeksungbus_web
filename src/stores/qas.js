@@ -150,7 +150,6 @@ export const useQAsStore = defineStore("qas", () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      await fetchQAs();
       return response.data;
     } catch (error) {
       console.error("Q&A 생성 실패:", error);
@@ -165,7 +164,7 @@ export const useQAsStore = defineStore("qas", () => {
           "Content-Type": "multipart/form-data",
         },
       });
-      await fetchQAs();
+      // await fetchQAs();
       return response.data;
     } catch (error) {
       console.error("Q&A 수정 실패:", error);

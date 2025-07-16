@@ -200,13 +200,13 @@
                 </h3>
                 <span
                   v-if="item.done"
-                  class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded"
+                  class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded"
                 >
                   처리완료
                 </span>
                 <span
                   v-else
-                  class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded"
+                  class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded"
                 >
                   처리중
                 </span>

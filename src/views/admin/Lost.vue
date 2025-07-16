@@ -300,7 +300,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <span
                   v-if="!item.done"
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
                 >
                   <svg
                     class="w-3 h-3 mr-1"
@@ -319,7 +319,7 @@
                 </span>
                 <span
                   v-else
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
                 >
                   <svg
                     class="w-3 h-3 mr-1"
@@ -349,7 +349,7 @@
                     @click="deleteItem(item.id)"
                     class="text-red-600 hover:text-red-800"
                   >
-                    삭제
+                    문의 삭제
                   </button>
                 </div>
               </td>

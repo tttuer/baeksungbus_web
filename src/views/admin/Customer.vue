@@ -347,7 +347,7 @@
                     @click="deleteInquiry(inquiry.id)"
                     class="text-red-600 hover:text-red-800"
                   >
-                    삭제
+                    문의 삭제
                   </button>
                 </div>
               </td>

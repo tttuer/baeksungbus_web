@@ -140,7 +140,7 @@
             >
               <h3 class="font-medium mb-1">{{ notice.title }}</h3>
               <p class="text-sm text-gray-500">
-                {{ formatDate(notice.created_at) }}
+                {{ formatDate(notice.c_date) }}
               </p>
             </router-link>
           </div>
