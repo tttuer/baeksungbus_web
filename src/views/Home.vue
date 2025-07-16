@@ -35,8 +35,8 @@
             />
           </svg>
         </div>
-        <h3 class="text-lg font-semibold mb-2">시간표</h3>
-        <p class="text-gray-600">버스 운행 시간을 확인하세요</p>
+        <h3 class="text-lg font-semibold mb-2">운행 노선</h3>
+        <p class="text-gray-600">버스 운행 노선을 확인하세요</p>
       </router-link>
 
       <router-link
