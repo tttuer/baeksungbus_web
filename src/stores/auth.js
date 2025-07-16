@@ -32,19 +32,21 @@ export const useAuthStore = defineStore("auth", () => {
         localStorage.setItem("token", token.value);
         return;
       }
-      
+
       const loginError = new Error("로그인에 실패했습니다.");
       loginError.response = { status: 401 };
       throw loginError;
     } catch (error) {
       isLoading.value = false;
-      
+
       if (error.message === "로그인에 실패했습니다.") {
         throw error;
       }
-      
+
       const authError = new Error(
-        error.response?.data?.detail || error.message || "로그인 중 오류가 발생했습니다."
+        error.response?.data?.detail ||
+          error.message ||
+          "로그인 중 오류가 발생했습니다."
       );
       authError.response = error.response;
       throw authError;
@@ -69,9 +71,9 @@ export const useAuthStore = defineStore("auth", () => {
 
   const isTokenExpired = () => {
     if (!token.value) return true;
-    
+
     try {
-      const payload = JSON.parse(atob(token.value.split('.')[1]));
+      const payload = JSON.parse(atob(token.value.split(".")[1]));
       const currentTime = Date.now() / 1000;
       return payload.expires < currentTime;
     } catch (error) {
