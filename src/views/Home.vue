@@ -250,6 +250,7 @@
 <script>
 import { ref, onMounted } from "vue";
 import { useNoticesStore } from "@/stores/notices";
+import { formatDate } from "@/utils/format";
 
 export default {
   name: "Home",
@@ -257,14 +258,7 @@ export default {
     const noticesStore = useNoticesStore();
     const recentNotices = ref([]);
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    };
+    
 
     const loadRecentNotices = async () => {
       try {

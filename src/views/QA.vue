@@ -345,6 +345,7 @@ import { ref, computed, onMounted, nextTick } from "vue";
 import { useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
 import api from "@/services/api";
+import { formatDate } from "@/utils/format";
 
 export default {
   name: "QA",
@@ -404,14 +405,7 @@ export default {
       return status === true ? "답변완료" : "답변대기";
     };
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
-    };
+    
 
     const search = async () => {
       const params = {

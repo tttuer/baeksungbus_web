@@ -217,6 +217,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQAsStore } from '@/stores/qas'
+import { formatDate } from "@/utils/format";
 
 export default {
   name: 'AdminCustomerDetail',
@@ -233,17 +234,7 @@ export default {
       content: ''
     })
 
-    const formatDate = (dateString) => {
-      if (!dateString) return ''
-      const date = new Date(dateString)
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
+    
 
     const getFileName = (url) => {
       if (!url) return ''

@@ -227,6 +227,7 @@
 
 <script>
 import { ref, onMounted } from "vue";
+import { formatDate } from "@/utils/format";
 
 export default {
   name: "Recruit",
@@ -283,14 +284,7 @@ export default {
       },
     ];
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    };
+    
 
     const applyForJob = (opening) => {
       alert(

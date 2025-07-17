@@ -188,6 +188,7 @@
 import { ref, reactive, watch } from "vue";
 import api from "@/services/api";
 import { useQAsStore } from "@/stores/qas";
+import { formatDate } from "@/utils/format";
 
 export default {
   name: "AnswerModal",
@@ -230,16 +231,7 @@ export default {
       emit("close");
     };
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    };
+    
 
     const handleFileChange = (event) => {
       const file = event.target.files[0];

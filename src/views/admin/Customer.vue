@@ -453,6 +453,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useQAsStore } from "@/stores/qas";
 import AnswerModal from "@/components/AnswerModal.vue";
+import { formatDate } from "@/utils/format";
 
 export default {
   name: "AdminCustomer",
@@ -492,16 +493,7 @@ export default {
       ).length;
     });
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    };
+    
 
     const search = async () => {
       currentPage.value = 1;

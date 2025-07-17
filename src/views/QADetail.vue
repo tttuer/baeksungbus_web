@@ -351,6 +351,7 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
 import { useAuthStore } from "@/stores/auth";
+import { formatDate } from "@/utils/format";
 
 export default {
   name: "QADetail",
@@ -393,16 +394,7 @@ export default {
       return status === true ? "답변완료" : "답변대기";
     };
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    };
+    
 
     const formatContent = (content) => {
       if (!content) return "";

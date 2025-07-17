@@ -230,6 +230,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useNoticesStore } from "@/stores/notices";
 import { useAuthStore } from "@/stores/auth";
+import { formatDate } from "@/utils/format";
 
 export default {
   name: "NoticeDetail",
@@ -265,16 +266,7 @@ export default {
       return labels[type] || "기타";
     };
 
-    const formatDate = (dateString) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    };
+    
 
     const formatContent = (content) => {
       if (!content) return "";
