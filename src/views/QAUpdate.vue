@@ -95,7 +95,10 @@
           </div>
 
           <!-- Current File -->
-          <div v-if="qa.attachment_filename && !form.remove_current_file" class="mb-6">
+          <div
+            v-if="qa.attachment_filename && !form.remove_current_file"
+            class="mb-6"
+          >
             <label class="block text-sm font-medium text-gray-700 mb-2">
               현재 첨부파일
             </label>
@@ -135,7 +138,9 @@
             <label class="block text-sm font-medium text-gray-700 mb-2">
               첨부파일 상태
             </label>
-            <div class="flex items-center p-3 bg-red-50 rounded-lg justify-between border border-red-200">
+            <div
+              class="flex items-center p-3 bg-red-50 rounded-lg justify-between border border-red-200"
+            >
               <div class="flex items-center">
                 <svg
                   class="w-5 h-5 text-red-500 mr-2"
@@ -150,7 +155,9 @@
                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                   />
                 </svg>
-                <span class="text-sm text-red-700">기존 첨부파일이 삭제 예정입니다</span>
+                <span class="text-sm text-red-700"
+                  >기존 첨부파일이 삭제 예정입니다</span
+                >
               </div>
               <button
                 type="button"
@@ -261,33 +268,6 @@
             </button>
           </div>
         </form>
-      </div>
-
-      <!-- Update Notice -->
-      <div class="card p-6 bg-yellow-50 border-yellow-200">
-        <div class="flex items-start">
-          <svg
-            class="w-5 h-5 text-yellow-600 mr-3 mt-0.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
-          </svg>
-          <div>
-            <h3 class="font-semibold text-yellow-800 mb-2">수정 안내</h3>
-            <ul class="text-yellow-700 text-sm space-y-1">
-              <li>• 답변이 등록된 문의는 수정할 수 없습니다.</li>
-              <li>• 수정 후에는 답변 대기 상태로 변경됩니다.</li>
-              <li>• 첨부파일을 변경하면 기존 파일은 삭제됩니다.</li>
-            </ul>
-          </div>
-        </div>
       </div>
     </div>
 

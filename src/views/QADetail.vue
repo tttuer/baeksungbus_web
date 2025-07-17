@@ -5,8 +5,33 @@
       <div class="spinner"></div>
     </div>
 
+    <!-- Password Modal -->
+    <div v-if="showPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 w-96">
+        <h3 class="text-lg font-semibold mb-4">비밀번호 입력</h3>
+        <p class="text-gray-600 mb-4">이 Q&A를 보려면 비밀번호를 입력해주세요.</p>
+        <form @submit.prevent="verifyPassword">
+          <input
+            v-model="passwordInput"
+            type="password"
+            class="form-input w-full mb-4"
+            placeholder="비밀번호를 입력하세요"
+            required
+          />
+          <div class="flex gap-2">
+            <button type="submit" class="btn btn-primary flex-1" :disabled="isVerifying">
+              {{ isVerifying ? '확인 중...' : '확인' }}
+            </button>
+            <button type="button" @click="goBack" class="btn btn-outline flex-1">
+              취소
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- QA Content -->
-    <div v-else-if="qa" class="space-y-6">
+    <div v-else-if="qa && isAuthenticated" class="space-y-6">
       <!-- Breadcrumb -->
       <nav class="flex text-sm text-gray-500">
         <router-link to="/" class="hover:text-primary-600">홈</router-link>
@@ -340,6 +365,10 @@ export default {
     const nextQA = ref(null);
     const isLoading = ref(true);
     const isSubmitting = ref(false);
+    const showPasswordModal = ref(false);
+    const passwordInput = ref('');
+    const isVerifying = ref(false);
+    const isAuthenticated = ref(false);
 
     const answerForm = reactive({
       content: "",
@@ -504,12 +533,51 @@ export default {
       return qa.value.qa_type === "LOST" ? "분실물 신고" : "새 문의하기";
     };
 
+    const verifyPassword = async () => {
+      try {
+        isVerifying.value = true;
+        
+        // QA의 비밀번호와 비교
+        if (qa.value && qa.value.password && qa.value.password === passwordInput.value) {
+          isAuthenticated.value = true;
+          showPasswordModal.value = false;
+          passwordInput.value = '';
+        } else {
+          alert('비밀번호가 올바르지 않습니다.');
+          passwordInput.value = '';
+        }
+      } catch (error) {
+        console.error('비밀번호 확인 실패:', error);
+        alert('비밀번호 확인 중 오류가 발생했습니다.');
+      } finally {
+        isVerifying.value = false;
+      }
+    };
+
+    const goBack = () => {
+      // QA의 타입에 따라 적절한 목록으로 이동
+      if (qa.value && qa.value.qa_type === "LOST") {
+        router.push('/lost');
+      } else {
+        router.push('/qa');
+      }
+    };
+
     const loadQA = async () => {
       try {
         isLoading.value = true;
         const id = route.params.id;
 
         qa.value = await qasStore.fetchQAById(id);
+
+        // 관리자이거나 비밀번호가 없는 경우 바로 인증
+        // 또는 QA 목록에서 이미 인증되어 온 경우
+        if (authStore.isAdmin || !qa.value?.password || route.query.authenticated === 'true') {
+          isAuthenticated.value = true;
+        } else {
+          // 비밀번호가 있는 경우 모달 표시
+          showPasswordModal.value = true;
+        }
 
         // 이전/다음 Q&A 정보 (더미 데이터)
         if (parseInt(id) > 1) {
@@ -543,6 +611,10 @@ export default {
       nextQA,
       isLoading,
       isSubmitting,
+      showPasswordModal,
+      passwordInput,
+      isVerifying,
+      isAuthenticated,
       answerForm,
       canEditQA,
       canAnswer,
@@ -556,6 +628,8 @@ export default {
       submitAnswer,
       cancelAnswer,
       deleteQA,
+      verifyPassword,
+      goBack,
       getListRoute,
       getListTitle,
       getFormRoute,

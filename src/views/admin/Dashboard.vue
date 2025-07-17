@@ -306,7 +306,7 @@
         </router-link>
 
         <router-link
-          to="/adm/ddock"
+          to="/adm/lost"
           class="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow"
         >
           <div class="flex items-center">
@@ -326,8 +326,8 @@
               </svg>
             </div>
             <div class="ml-4">
-              <p class="font-medium text-gray-900">정류장 관리</p>
-              <p class="text-sm text-gray-600">정류장 정보 수정</p>
+              <p class="font-medium text-gray-900">분실물 관리</p>
+              <p class="text-sm text-gray-600">분실물 답변 관리</p>
             </div>
           </div>
         </router-link>

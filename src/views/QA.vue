@@ -470,7 +470,10 @@ export default {
 
         showPasswordModal.value = false;
         passwordInput.value = "";
-        router.push(`/qa/${selectedItemId.value}`);
+        router.push({
+          path: `/qa/${selectedItemId.value}`,
+          query: { authenticated: 'true' }
+        });
       } catch (error) {
         if (error.response?.status === 403) {
           alert("비밀번호가 올바르지 않습니다.");
