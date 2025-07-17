@@ -359,38 +359,28 @@ export default {
     const recentQAs = ref([]);
     const recentLostItems = ref([]);
 
-    
-
     const loadDashboardData = async () => {
       try {
         // 고객 문의 데이터 로드
         await qasStore.fetchQAs({
           qa_type: "CUSTOMER",
           page: 1,
-          page_size: 100,
+          page_size: 5,
         });
         recentQAs.value = qasStore.qas.slice(0, 5);
         stats.totalQAs = qasStore.pagination?.total || 0;
-
-        await qasStore.fetchQAs({
-          qa_type: "CUSTOMER",
-          page: 1,
-          page_size: 100,
-          done: false,
-        });
 
         await qasStore.fetchUnansweredCount();
         stats.unansweredQAs = qasStore.unansweredTotal;
 
         // 분실물 데이터 로드
         await qasStore.fetchQAs({ qa_type: "LOST", page: 1, page_size: 5 });
-        
+
         recentLostItems.value = qasStore.qas.slice(0, 5);
         stats.totalLostItems = qasStore.pagination?.total || 0;
 
         await qasStore.fetchUnansweredLostCount();
         stats.unansweredLosts = qasStore.unansweredLostTotal;
-
 
         // 공지사항 데이터 로드
         await noticesStore.fetchNotices({ page: 1, page_size: 1 });
