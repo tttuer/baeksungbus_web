@@ -304,7 +304,9 @@
             </div>
             <div>
               <h4 class="font-medium">확인 및 연락</h4>
-              <p class="text-gray-600 text-sm">분실물 발견 시 답변드립니다(이메일로 답변이 발송됩니다)</p>
+              <p class="text-gray-600 text-sm">
+                분실물 발견 시 답변드립니다(이메일로 답변이 발송됩니다)
+              </p>
             </div>
           </div>
         </div>
@@ -413,8 +415,6 @@ export default {
       return status === true ? "답변완료" : "답변대기";
     };
 
-    
-
     const search = async () => {
       currentPage.value = 1;
       const params = {
@@ -435,7 +435,7 @@ export default {
       selectedRoute.value = "";
       selectedStatus.value = "";
       currentPage.value = 1;
-      await qasStore.fetchQAs({ qa_type: "LOST", page: 1, page_size: 10 });
+      await qasStore.fetchQAs({ qa_type: "LOST", page: 1, page_size: 12 });
     };
 
     const goToPage = async (page) => {
@@ -519,7 +519,7 @@ export default {
         passwordInput.value = "";
         router.push({
           path: `/qa/${selectedItemId.value}`,
-          query: { authenticated: 'true' }
+          query: { authenticated: "true" },
         });
       } catch (error) {
         if (error.response?.status === 403) {
