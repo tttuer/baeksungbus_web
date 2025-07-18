@@ -21,137 +21,78 @@
         <div
           v-for="opening in openings"
           :key="opening.id"
-          class="card p-6 hover:shadow-lg transition-shadow"
+          class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
         >
-          <div class="flex justify-between items-start mb-4">
-            <div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-2">
+          <div class="bg-gradient-to-r from-primary-50 to-blue-50 p-6 border-b border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-2xl font-bold text-gray-900">
                 {{ opening.title }}
               </h3>
-              <div class="flex flex-wrap gap-2 mb-3">
-                <span
-                  class="bg-primary-100 text-primary-800 text-sm px-2 py-1 rounded"
-                >
-                  {{ opening.department }}
-                </span>
-                <span
-                  class="bg-green-100 text-green-800 text-sm px-2 py-1 rounded"
-                >
-                  {{ opening.employment_type }}
-                </span>
+              <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">
+                모집중
+              </span>
+            </div>
+            <span class="inline-flex items-center bg-primary-100 text-primary-800 text-sm font-semibold px-4 py-2 rounded-full">
+              <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 6h-2V4c0-1.11-.89-2-2-2H8c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/>
+              </svg>
+              {{ opening.department }}
+            </span>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <div>
+              <h4 class="flex items-center text-lg font-semibold text-gray-900 mb-4">
+                <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                응시자격
+              </h4>
+              <div class="bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+                <table class="w-full">
+                  <thead>
+                    <tr class="bg-gray-800 text-white">
+                      <th class="py-3 px-4 text-left font-semibold">구분</th>
+                      <th class="py-3 px-4 text-left font-semibold">내용</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(item, idx) in opening.experience"
+                      :key="idx"
+                      class="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                      <td class="py-3 px-4 font-semibold text-gray-700 bg-gray-100">{{ item.label }}</td>
+                      <td class="py-3 px-4 text-gray-600">{{ item.value }}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-            <span
-              class="px-2 py-1 text-xs font-medium rounded"
-              :class="
-                opening.urgent
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-blue-100 text-blue-800'
-              "
-            >
-              {{ opening.urgent ? "급구" : "모집중" }}
-            </span>
-          </div>
 
-          <div class="space-y-3 mb-4">
-            <div class="flex items-center text-gray-600">
-              <svg
-                class="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              {{ opening.location }}
+            <div v-if="opening.application_method">
+              <h4 class="flex items-center text-lg font-semibold text-gray-900 mb-3">
+                <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                응시방법
+              </h4>
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p class="text-gray-700 font-medium">{{ opening.application_method }}</p>
+              </div>
             </div>
 
-            <div class="flex items-center text-gray-600">
-              <svg
-                class="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                />
-              </svg>
-              {{ opening.salary }}
+            <div v-if="opening.note">
+              <h4 class="flex items-center text-lg font-semibold text-gray-900 mb-3">
+                <svg class="w-5 h-5 text-amber-600 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                비고
+              </h4>
+              <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <pre class="text-amber-800 font-medium text-sm leading-relaxed whitespace-pre-wrap">{{ opening.note }}</pre>
+              </div>
             </div>
-
-            <div class="flex items-center text-gray-600">
-              <svg
-                class="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {{ opening.schedule }}
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <h4 class="font-medium mb-2">주요 업무</h4>
-            <ul class="text-gray-600 text-sm space-y-1">
-              <li
-                v-for="task in opening.tasks"
-                :key="task"
-                class="flex items-start"
-              >
-                <span class="text-primary-600 mr-2">•</span>
-                {{ task }}
-              </li>
-            </ul>
-          </div>
-
-          <div class="mb-4">
-            <h4 class="font-medium mb-2">자격 요건</h4>
-            <ul class="text-gray-600 text-sm space-y-1">
-              <li
-                v-for="requirement in opening.requirements"
-                :key="requirement"
-                class="flex items-start"
-              >
-                <span class="text-primary-600 mr-2">•</span>
-                {{ requirement }}
-              </li>
-            </ul>
-          </div>
-
-          <div
-            class="flex justify-between items-center pt-4 border-t border-gray-200"
-          >
-            <span class="text-sm text-gray-500">
-              마감: {{ formatDate(opening.deadline) }}
-            </span>
-            <button
-              @click="applyForJob(opening)"
-              class="btn btn-primary btn-sm"
-            >
-              지원하기
-            </button>
           </div>
         </div>
       </div>
@@ -227,7 +168,6 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import { formatDate } from "@/utils/format";
 
 export default {
   name: "Recruit",
@@ -236,61 +176,32 @@ export default {
 
     // 더미 채용 공고 데이터
     const dummyOpenings = [
-      // {
-      //   id: 1,
-      //   title: "버스 운전기사",
-      //   department: "운송부",
-      //   employment_type: "정규직",
-      //   location: "경기도 평택시",
-      //   salary: "월 280만원~320만원 (경력에 따라 차등)",
-      //   schedule: "2교대 근무 (주 5일)",
-      //   urgent: true,
-      //   deadline: "2024-02-29",
-      //   tasks: [
-      //     "시내버스 및 시외버스 운전",
-      //     "승객 안전 관리",
-      //     "차량 점검 및 관리",
-      //     "운행일지 작성",
-      //   ],
-      //   requirements: [
-      //     "대형면허 소지자 (1종 대형)",
-      //     "버스 운전 경력 1년 이상 우대",
-      //     "무사고 운전자 우대",
-      //     "성실하고 책임감 있는 분",
-      //   ],
-      // },
-      // {
-      //   id: 2,
-      //   title: "정비기사",
-      //   department: "정비부",
-      //   employment_type: "정규직",
-      //   location: "경기도 평택시",
-      //   salary: "월 250만원~300만원",
-      //   schedule: "주간 근무 (주 5일)",
-      //   urgent: false,
-      //   deadline: "2024-03-15",
-      //   tasks: [
-      //     "버스 정기점검 및 수리",
-      //     "고장 진단 및 부품 교체",
-      //     "안전점검 실시",
-      //     "정비 기록 관리",
-      //   ],
-      //   requirements: [
-      //     "자동차 정비 관련 자격증 소지",
-      //     "대형차 정비 경력 우대",
-      //     "기계 관련 전문지식 보유",
-      //     "체력이 좋으신 분",
-      //   ],
-      // },
+      {
+        id: 1,
+        title: "승무직",
+        department: "승무사원",
+        experience: [
+          { label: "경력", value: "버스 및 대형 화물 경력자" },
+          {
+            label: "무경력",
+            value: "1종 대형면허, 버스운전자격증 소지자 중 상기 자격 미해당자",
+          },
+        ],
+        note: "※ 여객자동차운수사업법에 따라 운수종사자로서 결격사유가 없어야 함\n※ 무경력자는 기능 연수(15일), 현장 연수(15일) 후 채용",
+      },
+      {
+        id: 2,
+        title: "정비기술직",
+        department: "정비기술직",
+        experience: [
+          {
+            label: "경력",
+            value:
+              "대형자동차(버스분야) 정비 실무 경력자, 자동차 정비(검사) 관련 유자격자",
+          },
+        ],
+      },
     ];
-
-    
-
-    const applyForJob = (opening) => {
-      alert(
-        `${opening.title} 지원하기\n\n지원 방법:\n1. 이메일: recruit@baeksungbus.com\n2. 전화 문의: 031-673-3456\n3. 방문 접수: 경기도 안성시 금석길 14\n\n※ 이력서와 자기소개서를 준비해주세요.`
-      );
-    };
 
     onMounted(() => {
       openings.value = dummyOpenings;
@@ -298,8 +209,6 @@ export default {
 
     return {
       openings,
-      formatDate,
-      applyForJob,
     };
   },
 };
