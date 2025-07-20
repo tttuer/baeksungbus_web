@@ -4,8 +4,8 @@
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">사진 갤러리 관리</h1>
-          <p class="text-gray-600">홈페이지에 표시될 사진들을 관리할 수 있습니다</p>
+          <h1 class="text-2xl font-bold text-gray-900">똑버스 관리</h1>
+          <p class="text-gray-600">홈페이지에 표시될 똑버스 정보들을 관리할 수 있습니다</p>
         </div>
         <div class="flex space-x-3">
           <button
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
           <div class="p-2 bg-blue-100 rounded-lg">
@@ -43,34 +43,6 @@
           <div class="ml-4">
             <p class="text-sm font-medium text-gray-600">전체 사진</p>
             <p class="text-2xl font-bold text-gray-900">{{ totalImages }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="p-2 bg-green-100 rounded-lg">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">표시 중</p>
-            <p class="text-2xl font-bold text-gray-900">{{ activeImages }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center">
-          <div class="p-2 bg-yellow-100 rounded-lg">
-            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <div class="ml-4">
-            <p class="text-sm font-medium text-gray-600">오늘 업로드</p>
-            <p class="text-2xl font-bold text-gray-900">{{ todayUploads }}</p>
           </div>
         </div>
       </div>
