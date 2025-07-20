@@ -160,11 +160,31 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div v-if="schedule.image_data" class="flex items-center">
+                <div v-if="schedule.images && schedule.images.length > 0" class="flex items-center space-x-2">
+                  <div 
+                    v-for="(image, index) in schedule.images.slice(0, 3)" 
+                    :key="index"
+                    class="relative"
+                  >
+                    <img
+                      :src="`data:image/jpeg;base64,${image.data}`"
+                      :alt="image.filename || `노선 시간표 ${index + 1}`"
+                      class="w-12 h-12 object-cover rounded-lg border shadow-sm"
+                    />
+                  </div>
+                  <div 
+                    v-if="schedule.images.length > 3" 
+                    class="w-12 h-12 bg-gray-100 rounded-lg border flex items-center justify-center text-xs text-gray-500"
+                  >
+                    +{{ schedule.images.length - 3 }}
+                  </div>
+                </div>
+                <div v-else-if="schedule.image_data" class="flex items-center">
+                  <!-- 하위 호환성을 위한 단일 이미지 지원 -->
                   <img
                     :src="`data:image/jpeg;base64,${schedule.image_data}`"
                     :alt="schedule.image_filename || '노선 시간표'"
-                    class="w-16 h-16 object-cover rounded-lg border shadow-sm"
+                    class="w-12 h-12 object-cover rounded-lg border shadow-sm"
                   />
                 </div>
                 <div v-else class="text-sm text-gray-500">
@@ -358,28 +378,35 @@
             <!-- 이미지 업로드 -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2"
-                >노선 시간표</label
+                >노선 시간표 (여러 개 선택 가능)</label
               >
               <div class="space-y-4">
                 <input
                   type="file"
                   @change="handleImageUpload"
                   accept="image/*"
+                  multiple
                   class="form-input"
                 />
-                <div v-if="imagePreview" class="relative inline-block">
-                  <img
-                    :src="imagePreview"
-                    alt="노선 시간표 미리보기"
-                    class="max-w-xs max-h-40 object-contain rounded-lg border"
-                  />
-                  <button
-                    type="button"
-                    @click="removeImage"
-                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                <div v-if="imagePreviews.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div 
+                    v-for="(preview, index) in imagePreviews" 
+                    :key="index"
+                    class="relative"
                   >
-                    ×
-                  </button>
+                    <img
+                      :src="preview.url"
+                      :alt="`노선 시간표 미리보기 ${index + 1}`"
+                      class="w-full h-32 object-cover rounded-lg border"
+                    />
+                    <button
+                      type="button"
+                      @click="removeImage(index)"
+                      class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -474,7 +501,7 @@
                 <!-- 이미지 업로드 -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >노선 시간표</label
+                    >노선 시간표 (여러 개 선택 가능)</label
                   >
                   <div class="space-y-4">
                     <input
@@ -483,24 +510,31 @@
                         (event) => handleMultipleImageUpload(event, index)
                       "
                       accept="image/*"
+                      multiple
                       class="form-input"
                     />
                     <div
-                      v-if="route.imagePreview"
-                      class="relative inline-block"
+                      v-if="route.imagePreviews && route.imagePreviews.length > 0"
+                      class="grid grid-cols-2 md:grid-cols-3 gap-4"
                     >
-                      <img
-                        :src="route.imagePreview"
-                        alt="노선 시간표 미리보기"
-                        class="max-w-xs max-h-40 object-contain rounded-lg border"
-                      />
-                      <button
-                        type="button"
-                        @click="removeMultipleImage(index)"
-                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      <div 
+                        v-for="(preview, imgIndex) in route.imagePreviews" 
+                        :key="imgIndex"
+                        class="relative"
                       >
-                        ×
-                      </button>
+                        <img
+                          :src="preview.url"
+                          :alt="`노선 시간표 미리보기 ${imgIndex + 1}`"
+                          class="w-full h-32 object-cover rounded-lg border"
+                        />
+                        <button
+                          type="button"
+                          @click="removeMultipleImage(index, imgIndex)"
+                          class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -616,23 +650,23 @@ export default {
     const scheduleForm = reactive({
       route_number: "",
       url: "",
-      image: null,
-      image_data: null,
-      image_filename: null,
+      images: [],
+      images_data: [],
+      images_filenames: [],
     });
 
     const routeList = ref([
       {
         route_number: "",
         url: "",
-        image: null,
-        image_data: null,
-        image_filename: null,
-        imagePreview: null,
+        images: [],
+        images_data: [],
+        images_filenames: [],
+        imagePreviews: [],
       },
     ]);
 
-    const imagePreview = ref(null);
+    const imagePreviews = ref([]);
 
     const search = async () => {
       currentPage.value = 1;
@@ -711,19 +745,19 @@ export default {
       Object.assign(scheduleForm, {
         route_number: "",
         url: "",
-        image: null,
-        image_data: null,
-        image_filename: null,
+        images: [],
+        images_data: [],
+        images_filenames: [],
       });
-      imagePreview.value = null;
+      imagePreviews.value = [];
       routeList.value = [
         {
           route_number: "",
           url: "",
-          image: null,
-          image_data: null,
-          image_filename: null,
-          imagePreview: null,
+          images: [],
+          images_data: [],
+          images_filenames: [],
+          imagePreviews: [],
         },
       ];
       showModal.value = true;
@@ -734,16 +768,29 @@ export default {
       Object.assign(scheduleForm, {
         route_number: schedule.route_number,
         url: schedule.url || "",
-        image: null,
-        image_data: null,
-        image_filename: null,
+        images: [],
+        images_data: [],
+        images_filenames: [],
       });
 
-      // 기존 이미지가 있는 경우 미리보기 설정
-      if (schedule.image_data) {
-        imagePreview.value = `data:image/jpeg;base64,${schedule.image_data}`;
-      } else {
-        imagePreview.value = null;
+      // 기존 이미지들이 있는 경우 미리보기 설정
+      imagePreviews.value = [];
+      if (schedule.images && Array.isArray(schedule.images)) {
+        // 백엔드 API 형식: [{data: "base64", filename: "name"}, ...]
+        imagePreviews.value = schedule.images.map((image, index) => ({
+          url: `data:image/jpeg;base64,${image.data}`,
+          filename: image.filename || `image_${index + 1}.jpg`
+        }));
+        scheduleForm.images_data = schedule.images.map(img => img.data);
+        scheduleForm.images_filenames = schedule.images.map(img => img.filename || 'image.jpg');
+      } else if (schedule.image_data) {
+        // 기존 단일 이미지 지원 (하위 호환성)
+        imagePreviews.value = [{
+          url: `data:image/jpeg;base64,${schedule.image_data}`,
+          filename: schedule.image_filename || 'image.jpg'
+        }];
+        scheduleForm.images_data = [schedule.image_data];
+        scheduleForm.images_filenames = [schedule.image_filename || 'image.jpg'];
       }
       
       showModal.value = true;
@@ -752,87 +799,102 @@ export default {
     const closeModal = () => {
       showModal.value = false;
       editingSchedule.value = null;
-      imagePreview.value = null;
+      imagePreviews.value = [];
     };
 
     const handleImageUpload = (event) => {
-      const file = event.target.files[0];
-      if (file) {
+      const files = Array.from(event.target.files);
+      
+      for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
-          alert("파일 크기는 5MB를 초과할 수 없습니다.");
-          event.target.value = "";
-          return;
+          alert(`파일 ${file.name}의 크기는 5MB를 초과할 수 없습니다.`);
+          continue;
         }
 
         if (!file.type.startsWith("image/")) {
-          alert("이미지 파일만 업로드 가능합니다.");
-          event.target.value = "";
-          return;
+          alert(`${file.name}은(는) 이미지 파일이 아닙니다.`);
+          continue;
         }
 
-        scheduleForm.image = file;
-        scheduleForm.image_filename = file.name;
+        scheduleForm.images.push(file);
+        scheduleForm.images_filenames.push(file.name);
 
         const reader = new FileReader();
         reader.onload = (e) => {
-          imagePreview.value = e.target.result;
+          imagePreviews.value.push({
+            url: e.target.result,
+            filename: file.name
+          });
           // Base64 데이터만 추출 (data:image/jpeg;base64, 부분 제거)
-          scheduleForm.image_data = e.target.result.split(',')[1];
+          scheduleForm.images_data.push(e.target.result.split(',')[1]);
         };
         reader.readAsDataURL(file);
       }
+      
+      event.target.value = "";
     };
 
-    const removeImage = () => {
-      scheduleForm.image = null;
-      scheduleForm.image_data = null;
-      scheduleForm.image_filename = null;
-      imagePreview.value = null;
+    const removeImage = (index) => {
+      scheduleForm.images.splice(index, 1);
+      scheduleForm.images_data.splice(index, 1);
+      scheduleForm.images_filenames.splice(index, 1);
+      imagePreviews.value.splice(index, 1);
     };
 
-    const handleMultipleImageUpload = (event, index) => {
-      const file = event.target.files[0];
-      if (file) {
+    const handleMultipleImageUpload = (event, routeIndex) => {
+      const files = Array.from(event.target.files);
+      
+      for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
-          alert("파일 크기는 5MB를 초과할 수 없습니다.");
-          event.target.value = "";
-          return;
+          alert(`파일 ${file.name}의 크기는 5MB를 초과할 수 없습니다.`);
+          continue;
         }
 
         if (!file.type.startsWith("image/")) {
-          alert("이미지 파일만 업로드 가능합니다.");
-          event.target.value = "";
-          return;
+          alert(`${file.name}은(는) 이미지 파일이 아닙니다.`);
+          continue;
         }
 
-        routeList.value[index].image = file;
-        routeList.value[index].image_filename = file.name;
+        if (!routeList.value[routeIndex].images) {
+          routeList.value[routeIndex].images = [];
+          routeList.value[routeIndex].images_data = [];
+          routeList.value[routeIndex].images_filenames = [];
+          routeList.value[routeIndex].imagePreviews = [];
+        }
+
+        routeList.value[routeIndex].images.push(file);
+        routeList.value[routeIndex].images_filenames.push(file.name);
 
         const reader = new FileReader();
         reader.onload = (e) => {
-          routeList.value[index].imagePreview = e.target.result;
+          routeList.value[routeIndex].imagePreviews.push({
+            url: e.target.result,
+            filename: file.name
+          });
           // Base64 데이터만 추출 (data:image/jpeg;base64, 부분 제거)
-          routeList.value[index].image_data = e.target.result.split(',')[1];
+          routeList.value[routeIndex].images_data.push(e.target.result.split(',')[1]);
         };
         reader.readAsDataURL(file);
       }
+      
+      event.target.value = "";
     };
 
-    const removeMultipleImage = (index) => {
-      routeList.value[index].image = null;
-      routeList.value[index].image_data = null;
-      routeList.value[index].image_filename = null;
-      routeList.value[index].imagePreview = null;
+    const removeMultipleImage = (routeIndex, imageIndex) => {
+      routeList.value[routeIndex].images.splice(imageIndex, 1);
+      routeList.value[routeIndex].images_data.splice(imageIndex, 1);
+      routeList.value[routeIndex].images_filenames.splice(imageIndex, 1);
+      routeList.value[routeIndex].imagePreviews.splice(imageIndex, 1);
     };
 
     const addRoute = () => {
       routeList.value.push({
         route_number: "",
         url: "",
-        image: null,
-        image_data: null,
-        image_filename: null,
-        imagePreview: null,
+        images: [],
+        images_data: [],
+        images_filenames: [],
+        imagePreviews: [],
       });
     };
 
@@ -847,12 +909,19 @@ export default {
         isSubmitting.value = true;
 
         if (editingSchedule.value) {
-          // 단일 노선 수정 - JSON으로 전송
+          // 단일 노선 수정 - 백엔드 API 형식에 맞게 전송
+          const images = [];
+          for (let i = 0; i < scheduleForm.images_data.length; i++) {
+            images.push({
+              data: scheduleForm.images_data[i],
+              filename: scheduleForm.images_filenames[i] || `image_${i + 1}.jpg`
+            });
+          }
+
           const updateData = {
             route_number: scheduleForm.route_number,
             url: scheduleForm.url,
-            image_data: scheduleForm.image_data,
-            image_filename: scheduleForm.image_filename,
+            images: images,
           };
           
           await schedulesStore.updateSchedule(
@@ -861,19 +930,29 @@ export default {
           );
           alert("노선이 수정되었습니다.");
         } else {
-          // 다중 노선 생성 - 배열로 한번에 전송
+          // 다중 노선 생성 - 백엔드 API 형식에 맞게 배열로 전송
           const validRoutes = routeList.value.filter((route) =>
             route.route_number.trim()
           );
 
           if (validRoutes.length > 0) {
-            // Base64 데이터와 함께 JSON 배열로 전송
-            const routesToSubmit = validRoutes.map(route => ({
-              route_number: route.route_number,
-              url: route.url,
-              image_data: route.image_data,
-              image_filename: route.image_filename,
-            }));
+            const routesToSubmit = validRoutes.map(route => {
+              const images = [];
+              if (route.images_data && route.images_data.length > 0) {
+                for (let i = 0; i < route.images_data.length; i++) {
+                  images.push({
+                    data: route.images_data[i],
+                    filename: route.images_filenames[i] || `image_${i + 1}.jpg`
+                  });
+                }
+              }
+
+              return {
+                route_number: route.route_number,
+                url: route.url,
+                images: images,
+              };
+            });
             
             await schedulesStore.createSchedule(routesToSubmit);
             alert(`${validRoutes.length}개의 노선이 추가되었습니다.`);
@@ -946,7 +1025,7 @@ export default {
       isSubmitting,
       scheduleForm,
       routeList,
-      imagePreview,
+      imagePreviews,
       search,
       resetFilters,
       refreshData,

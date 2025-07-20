@@ -100,7 +100,21 @@
 
           <!-- 시간표 이미지 -->
           <div class="p-4">
-            <div v-if="schedule.image_data" class="mb-4">
+            <div v-if="schedule.images && schedule.images.length > 0" class="mb-4 relative">
+              <div class="relative">
+                <img
+                  :src="`data:image/jpeg;base64,${schedule.images[0].data}`"
+                  :alt="schedule.images[0].filename || '노선 시간표'"
+                  class="w-full h-48 object-cover rounded-lg shadow-sm cursor-pointer"
+                  @click="openTimetableModal(schedule)"
+                />
+                <div v-if="schedule.images.length > 1" class="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
+                  {{ schedule.images.length }}장
+                </div>
+              </div>
+            </div>
+            <div v-else-if="schedule.image_data" class="mb-4">
+              <!-- 하위 호환성을 위한 단일 이미지 지원 -->
               <img
                 :src="`data:image/jpeg;base64,${schedule.image_data}`"
                 :alt="schedule.image_filename || '노선 시간표'"
@@ -120,7 +134,7 @@
             <!-- 액션 버튼들 -->
             <div class="space-y-3">
               <button
-                v-if="schedule.image_data"
+                v-if="(schedule.images && schedule.images.length > 0) || schedule.image_data"
                 @click="openTimetableModal(schedule)"
                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
               >
@@ -128,6 +142,9 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 노선 시간표
+                <span v-if="schedule.images && schedule.images.length > 1" class="ml-1 text-xs bg-blue-500 px-1 rounded">
+                  {{ schedule.images.length }}장
+                </span>
               </button>
               
               <button
@@ -168,11 +185,11 @@
     <!-- Timetable Modal -->
     <div
       v-if="showTimetableModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 md:p-4"
       @click="closeTimetableModal"
     >
       <div
-        class="bg-white rounded-lg max-w-4xl max-h-screen overflow-y-auto"
+        class="bg-white rounded-lg w-full h-full md:max-w-6xl md:max-h-[90vh] md:w-auto md:h-auto overflow-y-auto"
         @click.stop
       >
         <div class="p-6 border-b border-gray-200">
@@ -202,12 +219,56 @@
         </div>
 
         <div class="p-6">
-          <div v-if="selectedSchedule?.image_data" class="text-center">
-            <img
-              :src="`data:image/jpeg;base64,${selectedSchedule.image_data}`"
-              :alt="selectedSchedule.image_filename || '노선 시간표'"
-              class="max-w-full max-h-96 object-contain mx-auto rounded-lg shadow-sm"
-            />
+          <div v-if="getScheduleImages().length > 0" class="text-center">
+            <!-- 이미지 슬라이더 -->
+            <div class="relative">
+              <img
+                :src="getScheduleImages()[currentImageIndex]"
+                :alt="`노선 시간표 ${currentImageIndex + 1}`"
+                class="w-full h-auto max-h-[60vh] md:max-h-[70vh] object-contain mx-auto rounded-lg shadow-sm"
+              />
+              
+              <!-- 이미지가 여러 개일 때만 네비게이션 표시 -->
+              <div v-if="getScheduleImages().length > 1">
+                <!-- 이전 버튼 -->
+                <button
+                  @click="prevImage"
+                  class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                
+                <!-- 다음 버튼 -->
+                <button
+                  @click="nextImage"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                
+                <!-- 이미지 인디케이터 -->
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                  <button
+                    v-for="(_, index) in getScheduleImages()"
+                    :key="index"
+                    @click="currentImageIndex = index"
+                    :class="[
+                      'w-2 h-2 rounded-full transition-colors',
+                      index === currentImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                    ]"
+                  ></button>
+                </div>
+                
+                <!-- 이미지 카운터 -->
+                <div class="absolute top-4 right-4 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                  {{ currentImageIndex + 1 }} / {{ getScheduleImages().length }}
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else class="text-center py-12">
             <svg
@@ -241,6 +302,7 @@ export default {
     const searchQuery = ref("");
     const showTimetableModal = ref(false);
     const selectedSchedule = ref(null);
+    const currentImageIndex = ref(0);
 
     const schedulesStore = useSchedulesStore();
 
@@ -267,12 +329,69 @@ export default {
 
     const openTimetableModal = (schedule) => {
       selectedSchedule.value = schedule;
+      currentImageIndex.value = 0;
       showTimetableModal.value = true;
+      
+      // 키보드 이벤트 리스너 추가
+      document.addEventListener('keydown', handleKeydown);
     };
 
     const closeTimetableModal = () => {
       showTimetableModal.value = false;
       selectedSchedule.value = null;
+      currentImageIndex.value = 0;
+      
+      // 키보드 이벤트 리스너 제거
+      document.removeEventListener('keydown', handleKeydown);
+    };
+
+    const handleKeydown = (event) => {
+      if (!showTimetableModal.value) return;
+      
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault();
+          prevImage();
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          nextImage();
+          break;
+        case 'Escape':
+          event.preventDefault();
+          closeTimetableModal();
+          break;
+      }
+    };
+
+    const getScheduleImages = () => {
+      if (!selectedSchedule.value) return [];
+      
+      // 백엔드 API 형식: [{data: "base64", filename: "name"}, ...]
+      if (selectedSchedule.value.images && selectedSchedule.value.images.length > 0) {
+        return selectedSchedule.value.images.map(image => `data:image/jpeg;base64,${image.data}`);
+      }
+      
+      // 하위 호환성을 위한 단일 이미지 형식
+      if (selectedSchedule.value.image_data) {
+        return [`data:image/jpeg;base64,${selectedSchedule.value.image_data}`];
+      }
+      
+      return [];
+    };
+
+    const nextImage = () => {
+      const images = getScheduleImages();
+      if (images.length > 1) {
+        currentImageIndex.value = (currentImageIndex.value + 1) % images.length;
+      }
+    };
+
+    const prevImage = () => {
+      const images = getScheduleImages();
+      if (images.length > 1) {
+        currentImageIndex.value = currentImageIndex.value === 0 ? images.length - 1 : currentImageIndex.value - 1;
+      }
     };
 
     const openNaverMap = (url) => {
@@ -296,10 +415,15 @@ export default {
       searchQuery,
       showTimetableModal,
       selectedSchedule,
+      currentImageIndex,
       applyFilters,
       resetFilters,
       openTimetableModal,
       closeTimetableModal,
+      handleKeydown,
+      getScheduleImages,
+      nextImage,
+      prevImage,
       openNaverMap,
       goToDetail,
     };
