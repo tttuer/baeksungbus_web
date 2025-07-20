@@ -121,6 +121,11 @@
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
+                시간표 이미지
+              </th>
+              <th
+                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 링크
               </th>
               <th
@@ -155,28 +160,28 @@
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
+                <div v-if="schedule.image_data" class="flex items-center">
+                  <img
+                    :src="`data:image/jpeg;base64,${schedule.image_data}`"
+                    :alt="schedule.image_filename || '노선 시간표'"
+                    class="w-16 h-16 object-cover rounded-lg border shadow-sm"
+                  />
+                </div>
+                <div v-else class="text-sm text-gray-500">
+                  이미지 없음
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">
-                  <div class="flex items-center">
-                    <span>{{ schedule.departure }}</span>
-                    <svg
-                      class="w-4 h-4 mx-2 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17 8l4 4m0 0l-4 4m4-4H3"
-                      />
-                    </svg>
-                    <span
-                      ><a :href="schedule.url" target="_blank">{{
-                        schedule.url
-                      }}</a></span
-                    >
-                  </div>
+                  <a 
+                    v-if="schedule.url" 
+                    :href="schedule.url" 
+                    target="_blank"
+                    class="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    네이버 지도에서 보기
+                  </a>
+                  <span v-else class="text-gray-500">링크 없음</span>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -295,7 +300,11 @@
           <h3 class="text-lg font-semibold text-gray-900">
             {{ editingSchedule ? "노선 수정" : "노선 추가" }}
           </h3>
-          <a href="https://map.naver.com/p?c=15.00,0,0,0,dh" target="_blank" class="flex items-center gap-1 text-blue-600">
+          <a
+            href="https://map.naver.com/p?c=15.00,0,0,0,dh"
+            target="_blank"
+            class="flex items-center gap-1 text-blue-600"
+          >
             네이버 지도 바로가기
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -316,31 +325,63 @@
 
         <form @submit.prevent="submitSchedule" class="p-6 space-y-6">
           <!-- 단일 노선 생성 (수정 모드) -->
-          <div v-if="editingSchedule" class="flex gap-4 items-start">
-            <div class="w-32">
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >노선번호 *</label
-              >
-              <input
-                v-model="scheduleForm.route_number"
-                type="text"
-                class="form-input"
-                placeholder="예: 142"
-                required
-                :disabled="editingSchedule"
-              />
+          <div v-if="editingSchedule" class="space-y-6">
+            <!-- 기본 정보 -->
+            <div class="flex gap-4 items-start">
+              <div class="w-32">
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >노선번호 *</label
+                >
+                <input
+                  v-model="scheduleForm.route_number"
+                  type="text"
+                  class="form-input"
+                  placeholder="예: 142"
+                  required
+                  :disabled="editingSchedule"
+                />
+              </div>
+
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >네이버 지도 링크</label
+                >
+                <input
+                  v-model="scheduleForm.url"
+                  type="text"
+                  class="form-input"
+                  placeholder="네이버 지도의 노선 검색 링크를 입력해주세요"
+                />
+              </div>
             </div>
 
-            <div class="flex-1">
+            <!-- 이미지 업로드 -->
+            <div>
               <label class="block text-sm font-medium text-gray-700 mb-2"
-                >네이버 지도 링크</label
+                >노선 시간표</label
               >
-              <input
-                v-model="scheduleForm.url"
-                type="text"
-                class="form-input"
-                placeholder="네이버 지도의 노선 검색 링크를 입력해주세요"
-              />
+              <div class="space-y-4">
+                <input
+                  type="file"
+                  @change="handleImageUpload"
+                  accept="image/*"
+                  class="form-input"
+                />
+                <div v-if="imagePreview" class="relative inline-block">
+                  <img
+                    :src="imagePreview"
+                    alt="노선 시간표 미리보기"
+                    class="max-w-xs max-h-40 object-contain rounded-lg border"
+                  />
+                  <button
+                    type="button"
+                    @click="removeImage"
+                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -370,38 +411,16 @@
               </button>
             </div>
 
-            <div class="space-y-4">
+            <div class="space-y-6">
               <div
                 v-for="(route, index) in routeList"
                 :key="index"
-                class="border border-gray-200 rounded-lg p-4 flex gap-4 items-start"
+                class="border border-gray-200 rounded-lg p-6 space-y-4"
               >
-                <div class="w-32">
-                  <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >노선번호 *</label
-                  >
-                  <input
-                    v-model="route.route_number"
-                    type="text"
-                    class="form-input"
-                    placeholder="예: 142"
-                    required
-                  />
-                </div>
-
-                <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >네이버 지도 링크</label
-                  >
-                  <input
-                    v-model="route.url"
-                    type="text"
-                    class="form-input"
-                    placeholder="네이버 지도의 노선 검색 링크를 입력해주세요"
-                  />
-                </div>
-
-                <div class="w-8 flex justify-center pt-8">
+                <div class="flex items-center justify-between">
+                  <h5 class="text-sm font-medium text-gray-700">
+                    노선 {{ index + 1 }}
+                  </h5>
                   <button
                     v-if="routeList.length > 1"
                     type="button"
@@ -422,6 +441,68 @@
                       />
                     </svg>
                   </button>
+                </div>
+
+                <!-- 기본 정보 -->
+                <div class="flex gap-4 items-start">
+                  <div class="w-32">
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >노선번호 *</label
+                    >
+                    <input
+                      v-model="route.route_number"
+                      type="text"
+                      class="form-input"
+                      placeholder="예: 142"
+                      required
+                    />
+                  </div>
+
+                  <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >네이버 지도 링크</label
+                    >
+                    <input
+                      v-model="route.url"
+                      type="text"
+                      class="form-input"
+                      placeholder="네이버 지도의 노선 검색 링크를 입력해주세요"
+                    />
+                  </div>
+                </div>
+
+                <!-- 이미지 업로드 -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >노선 시간표</label
+                  >
+                  <div class="space-y-4">
+                    <input
+                      type="file"
+                      @change="
+                        (event) => handleMultipleImageUpload(event, index)
+                      "
+                      accept="image/*"
+                      class="form-input"
+                    />
+                    <div
+                      v-if="route.imagePreview"
+                      class="relative inline-block"
+                    >
+                      <img
+                        :src="route.imagePreview"
+                        alt="노선 시간표 미리보기"
+                        class="max-w-xs max-h-40 object-contain rounded-lg border"
+                      />
+                      <button
+                        type="button"
+                        @click="removeMultipleImage(index)"
+                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -535,14 +616,23 @@ export default {
     const scheduleForm = reactive({
       route_number: "",
       url: "",
+      image: null,
+      image_data: null,
+      image_filename: null,
     });
 
     const routeList = ref([
       {
         route_number: "",
         url: "",
+        image: null,
+        image_data: null,
+        image_filename: null,
+        imagePreview: null,
       },
     ]);
+
+    const imagePreview = ref(null);
 
     const search = async () => {
       currentPage.value = 1;
@@ -621,11 +711,19 @@ export default {
       Object.assign(scheduleForm, {
         route_number: "",
         url: "",
+        image: null,
+        image_data: null,
+        image_filename: null,
       });
+      imagePreview.value = null;
       routeList.value = [
         {
           route_number: "",
           url: "",
+          image: null,
+          image_data: null,
+          image_filename: null,
+          imagePreview: null,
         },
       ];
       showModal.value = true;
@@ -636,19 +734,105 @@ export default {
       Object.assign(scheduleForm, {
         route_number: schedule.route_number,
         url: schedule.url || "",
+        image: null,
+        image_data: null,
+        image_filename: null,
       });
+
+      // 기존 이미지가 있는 경우 미리보기 설정
+      if (schedule.image_data) {
+        imagePreview.value = `data:image/jpeg;base64,${schedule.image_data}`;
+      } else {
+        imagePreview.value = null;
+      }
+      
       showModal.value = true;
     };
 
     const closeModal = () => {
       showModal.value = false;
       editingSchedule.value = null;
+      imagePreview.value = null;
+    };
+
+    const handleImageUpload = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          alert("파일 크기는 5MB를 초과할 수 없습니다.");
+          event.target.value = "";
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          alert("이미지 파일만 업로드 가능합니다.");
+          event.target.value = "";
+          return;
+        }
+
+        scheduleForm.image = file;
+        scheduleForm.image_filename = file.name;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.value = e.target.result;
+          // Base64 데이터만 추출 (data:image/jpeg;base64, 부분 제거)
+          scheduleForm.image_data = e.target.result.split(',')[1];
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const removeImage = () => {
+      scheduleForm.image = null;
+      scheduleForm.image_data = null;
+      scheduleForm.image_filename = null;
+      imagePreview.value = null;
+    };
+
+    const handleMultipleImageUpload = (event, index) => {
+      const file = event.target.files[0];
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+          alert("파일 크기는 5MB를 초과할 수 없습니다.");
+          event.target.value = "";
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          alert("이미지 파일만 업로드 가능합니다.");
+          event.target.value = "";
+          return;
+        }
+
+        routeList.value[index].image = file;
+        routeList.value[index].image_filename = file.name;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          routeList.value[index].imagePreview = e.target.result;
+          // Base64 데이터만 추출 (data:image/jpeg;base64, 부분 제거)
+          routeList.value[index].image_data = e.target.result.split(',')[1];
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const removeMultipleImage = (index) => {
+      routeList.value[index].image = null;
+      routeList.value[index].image_data = null;
+      routeList.value[index].image_filename = null;
+      routeList.value[index].imagePreview = null;
     };
 
     const addRoute = () => {
       routeList.value.push({
         route_number: "",
         url: "",
+        image: null,
+        image_data: null,
+        image_filename: null,
+        imagePreview: null,
       });
     };
 
@@ -663,10 +847,17 @@ export default {
         isSubmitting.value = true;
 
         if (editingSchedule.value) {
-          // 단일 노선 수정
+          // 단일 노선 수정 - JSON으로 전송
+          const updateData = {
+            route_number: scheduleForm.route_number,
+            url: scheduleForm.url,
+            image_data: scheduleForm.image_data,
+            image_filename: scheduleForm.image_filename,
+          };
+          
           await schedulesStore.updateSchedule(
             editingSchedule.value.id,
-            scheduleForm
+            updateData
           );
           alert("노선이 수정되었습니다.");
         } else {
@@ -676,7 +867,15 @@ export default {
           );
 
           if (validRoutes.length > 0) {
-            await schedulesStore.createSchedules(validRoutes);
+            // Base64 데이터와 함께 JSON 배열로 전송
+            const routesToSubmit = validRoutes.map(route => ({
+              route_number: route.route_number,
+              url: route.url,
+              image_data: route.image_data,
+              image_filename: route.image_filename,
+            }));
+            
+            await schedulesStore.createSchedule(routesToSubmit);
             alert(`${validRoutes.length}개의 노선이 추가되었습니다.`);
           }
         }
@@ -747,6 +946,7 @@ export default {
       isSubmitting,
       scheduleForm,
       routeList,
+      imagePreview,
       search,
       resetFilters,
       refreshData,
@@ -757,6 +957,10 @@ export default {
       closeModal,
       addRoute,
       removeRoute,
+      handleImageUpload,
+      removeImage,
+      handleMultipleImageUpload,
+      removeMultipleImage,
       submitSchedule,
       viewSchedule,
       toggleStatus,
