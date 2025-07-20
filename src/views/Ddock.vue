@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">똑버스</h1>
-      <p class="text-gray-600">백성운수의 똑버스를 확인하세요</p>
+      <p class="text-gray-600">백성운수의 똑버스 정보를 확인하세요</p>
     </div>
 
     <!-- Image Gallery -->
@@ -63,6 +63,18 @@
       </div>
     </div>
 
+    <!-- Scroll to Top Button -->
+    <button
+      v-show="showScrollToTop"
+      @click="scrollToTop"
+      class="scroll-to-top-btn"
+      aria-label="맨 위로 이동"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+      </svg>
+    </button>
+
   </div>
 </template>
 
@@ -81,6 +93,9 @@ export default {
     const isLoadingMore = ref(false)
     const loadMoreTrigger = ref(null)
     const observer = ref(null)
+    
+    // Scroll to top state
+    const showScrollToTop = ref(false)
 
 
     // Computed
@@ -144,6 +159,18 @@ export default {
     }
 
 
+    // Scroll to top functionality
+    const handleScroll = () => {
+      showScrollToTop.value = window.scrollY > 300
+    }
+
+    const scrollToTop = () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
+
     // Image load handlers
     const onImageLoad = () => {
       // 이미지 로드 완료 시 처리 (필요한 경우)
@@ -161,12 +188,17 @@ export default {
       // DOM 업데이트 후 intersection observer 설정
       await nextTick()
       setupIntersectionObserver()
+      
+      // 스크롤 이벤트 리스너 등록
+      window.addEventListener('scroll', handleScroll, { passive: true })
     })
 
     onUnmounted(() => {
       if (observer.value) {
         observer.value.disconnect()
       }
+      // 스크롤 이벤트 리스너 제거
+      window.removeEventListener('scroll', handleScroll)
     })
 
     return {
@@ -176,6 +208,10 @@ export default {
       isLoadingMore,
       hasMoreItems,
       loadMoreTrigger,
+      
+      // Scroll to top
+      showScrollToTop,
+      scrollToTop,
       
       // Methods
       onImageLoad,
@@ -259,6 +295,56 @@ export default {
   
   .strip-image {
     max-width: 100%;
+  }
+}
+
+/* Scroll to Top Button */
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 40;
+  backdrop-filter: blur(10px);
+}
+
+.scroll-to-top-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.scroll-to-top-btn:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-to-top-btn {
+    bottom: 1rem;
+    right: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
 </style>
