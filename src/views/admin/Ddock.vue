@@ -200,7 +200,7 @@
                 {{ ddock.image_name || `이미지 ${ddock.id}` }}
               </p>
               <p class="text-xs text-gray-500 mt-1">
-                순서: {{ ddock.order }} | ID: {{ ddock.id }}
+                순서: {{ ddock.order }}
               </p>
             </div>
           </div>
@@ -381,7 +381,7 @@ export default {
     })
     
     const isLoading = computed(() => ddocksStore.isLoading)
-    const ddocks = computed(() => ddocksStore.ddocks)
+    const ddocks = computed(() => ddocksStore.ddocks || [])
     
     const sortedDdocks = computed(() => {
       if (!Array.isArray(ddocks.value)) return []
@@ -390,23 +390,8 @@ export default {
 
     const totalImages = computed(() => {
       if (!Array.isArray(ddocks.value)) return 0
-      return ddocks.value.length
-    })
-    
-    const activeImages = computed(() => {
-      if (!Array.isArray(ddocks.value)) return 0
-      return ddocks.value.filter(ddock => ddock.image).length
-    })
-    
-    const todayUploads = computed(() => {
-      if (!Array.isArray(ddocks.value)) return 0
-      const today = new Date().toDateString()
-      return ddocks.value.filter(ddock => {
-        if (ddock.created_at) {
-          return new Date(ddock.created_at).toDateString() === today
-        }
-        return false
-      }).length
+      // 페이지네이션 total_count가 있으면 사용, 없으면 현재 로드된 배열 길이 사용
+      return ddocksStore.pagination?.total_count || ddocks.value.length
     })
     
     const totalSize = computed(() => {
@@ -429,7 +414,8 @@ export default {
     }
 
     const refreshData = async () => {
-      await ddocksStore.fetchDdocks()
+      // 관리자 페이지에서는 모든 데이터를 로드
+      await ddocksStore.fetchDdocks({ page_size: 50 })
     }
 
     const openUploadModal = () => {
@@ -576,6 +562,7 @@ export default {
         await ddocksStore.updateOrder(orderData)
         
         hasOrderChanges.value = false
+        await refreshData()
         alert('순서가 저장되었습니다.')
         
       } catch (error) {
@@ -608,8 +595,6 @@ export default {
       ddocks,
       sortedDdocks,
       totalImages,
-      activeImages,
-      todayUploads,
       totalSize,
       enableDragSort,
       showUploadModal,
