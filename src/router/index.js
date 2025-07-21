@@ -123,6 +123,12 @@ const router = createRouter({
           name: 'admin-lost',
           component: () => import('@/views/admin/Lost.vue'),
           meta: { requiresAuth: true }
+        },
+        {
+          path: 'recruit',
+          name: 'admin-recruit',
+          component: () => import('@/views/admin/Recruit.vue'),
+          meta: { requiresAuth: true }
         }
       ]
     },

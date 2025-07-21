@@ -14,8 +14,14 @@
     <div class="mb-8">
       <h2 class="text-2xl font-bold text-gray-900 mb-6">현재 모집 중인 직종</h2>
 
+      <!-- Loading -->
+      <div v-if="isLoading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+        <p class="text-gray-600 mt-2">로딩 중...</p>
+      </div>
+
       <div
-        v-if="openings.length > 0"
+        v-else-if="openings.length > 0"
         class="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
         <div
@@ -34,7 +40,7 @@
             </div>
             <span class="inline-flex items-center bg-primary-100 text-primary-800 text-sm font-semibold px-4 py-2 rounded-full">
               <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20 6h-2V4c0-1.11-.89-2-2-2H8c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/>
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
               </svg>
               {{ opening.department }}
             </span>
@@ -108,7 +114,7 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2h8z"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
           />
         </svg>
         <h3 class="text-lg font-medium text-gray-900 mb-2">
@@ -167,48 +173,23 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
+import { useRecruitsStore } from "@/stores/recruits";
 
 export default {
   name: "Recruit",
   setup() {
-    const openings = ref([]);
-
-    // 더미 채용 공고 데이터
-    const dummyOpenings = [
-      {
-        id: 1,
-        title: "승무직",
-        department: "승무사원",
-        experience: [
-          { label: "경력", value: "버스 및 대형 화물 경력자" },
-          {
-            label: "무경력",
-            value: "1종 대형면허, 버스운전자격증 소지자 중 상기 자격 미해당자",
-          },
-        ],
-        note: "※ 여객자동차운수사업법에 따라 운수종사자로서 결격사유가 없어야 함\n※ 무경력자는 기능 연수(15일), 현장 연수(15일) 후 채용",
-      },
-      {
-        id: 2,
-        title: "정비기술직",
-        department: "정비기술직",
-        experience: [
-          {
-            label: "경력",
-            value:
-              "대형자동차(버스분야) 정비 실무 경력자, 자동차 정비(검사) 관련 유자격자",
-          },
-        ],
-      },
-    ];
+    const recruitsStore = useRecruitsStore();
+    const { recruits, isLoading } = storeToRefs(recruitsStore);
 
     onMounted(() => {
-      openings.value = dummyOpenings;
+      recruitsStore.fetchRecruits();
     });
 
     return {
-      openings,
+      openings: recruits,
+      isLoading,
     };
   },
 };
