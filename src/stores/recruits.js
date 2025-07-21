@@ -51,7 +51,7 @@ export const useRecruitsStore = defineStore("recruits", () => {
 
   const updateRecruit = async (id, recruitData) => {
     try {
-      const response = await api.put(`/api/recruits/${id}`, recruitData, {
+      const response = await api.patch(`/api/recruits/${id}`, recruitData, {
         headers: {
           "Content-Type": "application/json",
         },
