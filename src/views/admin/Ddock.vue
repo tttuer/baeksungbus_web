@@ -76,6 +76,40 @@
               />
               드래그 정렬 모드
             </label>
+            <label class="flex items-center text-sm text-gray-600">
+              <input
+                type="checkbox"
+                v-model="selectMode"
+                class="mr-2 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              선택 모드
+            </label>
+            <div v-if="selectMode" class="flex items-center space-x-2">
+              <button
+                @click="selectAll"
+                class="btn btn-outline btn-sm"
+              >
+                전체 선택
+              </button>
+              <button
+                @click="deselectAll"
+                class="btn btn-outline btn-sm"
+              >
+                선택 해제
+              </button>
+              <button
+                v-if="selectedImages.length > 0"
+                @click="deleteSelectedImages"
+                class="btn btn-danger btn-sm"
+                :disabled="isDeletingSelected"
+              >
+                <svg v-if="isDeletingSelected" class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+                선택된 {{ selectedImages.length }}개 삭제
+              </button>
+            </div>
             <button
               v-if="hasOrderChanges"
               @click="saveOrder"
@@ -117,12 +151,26 @@
             v-for="(ddock, index) in sortedDdocks"
             :key="ddock.id"
             class="relative group bg-gray-50 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-            :class="{ 'cursor-move': enableDragSort }"
+            :class="{ 
+              'cursor-move': enableDragSort,
+              'ring-2 ring-primary-500': selectMode && selectedImages.includes(ddock.id),
+              'opacity-75': selectMode && selectedImages.includes(ddock.id)
+            }"
             @dragstart="onDragStart($event, index)"
             @dragover="onDragOver"
             @drop="onDrop($event, index)"
-            :draggable="enableDragSort"
+            :draggable="enableDragSort && !selectMode"
           >
+            <!-- Selection Checkbox -->
+            <div v-if="selectMode" class="absolute top-2 left-2 z-10">
+              <input
+                type="checkbox"
+                :checked="selectedImages.includes(ddock.id)"
+                @change="toggleImageSelection(ddock.id)"
+                class="h-5 w-5 text-primary-600 focus:ring-primary-500 border-gray-300 rounded bg-white shadow-lg"
+              />
+            </div>
+
             <!-- Image -->
             <div class="aspect-square relative overflow-hidden">
               <img
@@ -139,7 +187,7 @@
               </div>
               
               <!-- Order Badge -->
-              <div class="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+              <div v-if="!selectMode" class="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
                 #{{ ddock.order }}
               </div>
 
@@ -151,7 +199,7 @@
               </div>
 
               <!-- Hover Actions -->
-              <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+              <div v-if="!selectMode" class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
                 <button
                   @click="viewImage(ddock)"
                   class="p-2 bg-white bg-opacity-90 rounded-full hover:bg-white transition-colors"
@@ -365,6 +413,9 @@ export default {
     const ddocksStore = useDdocksStore()
     
     const enableDragSort = ref(false)
+    const selectMode = ref(false)
+    const selectedImages = ref([])
+    const isDeletingSelected = ref(false)
     const showUploadModal = ref(false)
     const showImageViewer = ref(false)
     const selectedImage = ref(null)
@@ -573,6 +624,52 @@ export default {
       }
     }
 
+    const toggleImageSelection = (imageId) => {
+      const index = selectedImages.value.indexOf(imageId)
+      if (index > -1) {
+        selectedImages.value.splice(index, 1)
+      } else {
+        selectedImages.value.push(imageId)
+      }
+    }
+
+    const selectAll = () => {
+      selectedImages.value = sortedDdocks.value.map(ddock => ddock.id)
+    }
+
+    const deselectAll = () => {
+      selectedImages.value = []
+    }
+
+    const deleteSelectedImages = async () => {
+      if (selectedImages.value.length === 0) return
+
+      const confirmMessage = `선택된 ${selectedImages.value.length}개의 사진을 삭제하시겠습니까?\n\n삭제된 사진은 복구할 수 없습니다.`
+      if (!confirm(confirmMessage)) return
+
+      try {
+        isDeletingSelected.value = true
+
+        // 선택된 이미지들을 하나씩 삭제
+        const deletePromises = selectedImages.value.map(imageId => 
+          ddocksStore.deleteDdock(imageId)
+        )
+
+        await Promise.all(deletePromises)
+        
+        alert(`${selectedImages.value.length}개의 사진이 삭제되었습니다.`)
+        selectedImages.value = []
+        selectMode.value = false
+        await refreshData()
+        
+      } catch (error) {
+        console.error('일괄 삭제 실패:', error)
+        alert('일부 사진 삭제에 실패했습니다. 다시 시도해주세요.')
+      } finally {
+        isDeletingSelected.value = false
+      }
+    }
+
     const deleteImage = async (ddock) => {
       if (!confirm(`'${ddock.image_name || `이미지 ${ddock.id}`}'을(를) 삭제하시겠습니까?`)) return
 
@@ -597,6 +694,9 @@ export default {
       totalImages,
       totalSize,
       enableDragSort,
+      selectMode,
+      selectedImages,
+      isDeletingSelected,
       showUploadModal,
       showImageViewer,
       selectedImage,
@@ -621,6 +721,10 @@ export default {
       onDragOver,
       onDrop,
       saveOrder,
+      toggleImageSelection,
+      selectAll,
+      deselectAll,
+      deleteSelectedImages,
       deleteImage
     }
   }
@@ -635,5 +739,13 @@ export default {
 
 .aspect-square {
   aspect-ratio: 1 / 1;
+}
+
+.btn-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+}
+
+.btn-danger:disabled {
+  @apply bg-red-400 cursor-not-allowed;
 }
 </style>
