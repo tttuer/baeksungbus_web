@@ -63,10 +63,33 @@
       >
         <div class="bg-gradient-to-r from-primary-50 to-blue-50 p-6 border-b border-gray-100">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="text-2xl font-bold text-gray-900">
-              {{ recruit.title }}
-            </h3>
+            <div class="flex items-center space-x-3">
+              <h3 class="text-2xl font-bold text-gray-900">
+                {{ recruit.title }}
+              </h3>
+              <span 
+                :class="[
+                  'text-xs font-bold px-3 py-1 rounded-full',
+                  recruit.show 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                ]"
+              >
+                {{ recruit.show ? '노출중' : '숨김' }}
+              </span>
+            </div>
             <div class="flex space-x-2">
+              <button
+                @click="toggleShow(recruit.id, recruit.show)"
+                :class="[
+                  'btn btn-sm',
+                  recruit.show 
+                    ? 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200' 
+                    : 'bg-green-100 text-green-700 border-green-300 hover:bg-green-200'
+                ]"
+              >
+                {{ recruit.show ? '숨기기' : '노출하기' }}
+              </button>
               <button
                 @click="openEditModal(recruit)"
                 class="btn btn-sm btn-outline"
@@ -242,6 +265,19 @@
               ></textarea>
             </div>
 
+            <!-- Show Toggle -->
+            <div class="flex items-center">
+              <input
+                id="show-toggle"
+                v-model="form.show"
+                type="checkbox"
+                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              <label for="show-toggle" class="ml-2 block text-sm text-gray-900">
+                채용 공고 노출하기
+              </label>
+            </div>
+
             <!-- Submit Buttons -->
             <div class="flex justify-end space-x-3 pt-4">
               <button
@@ -286,7 +322,8 @@ export default {
       title: "",
       department: "",
       experience: [{ label: "", value: "" }],
-      note: ""
+      note: "",
+      show: true
     });
 
     const resetForm = () => {
@@ -294,7 +331,8 @@ export default {
         title: "",
         department: "",
         experience: [{ label: "", value: "" }],
-        note: ""
+        note: "",
+        show: true
       };
       isEditMode.value = false;
       editingId.value = null;
@@ -310,7 +348,8 @@ export default {
         title: recruit.title,
         department: recruit.department,
         experience: [...recruit.experience],
-        note: recruit.note || ""
+        note: recruit.note || "",
+        show: recruit.show
       };
       isEditMode.value = true;
       editingId.value = recruit.id;
@@ -358,12 +397,20 @@ export default {
       }
     };
 
+    const toggleShow = async (id, currentShow) => {
+      try {
+        await recruitsStore.toggleRecruitShow(id, !currentShow);
+      } catch (error) {
+        console.error("Error toggling recruit show status:", error);
+      }
+    };
+
     const refreshData = () => {
-      recruitsStore.fetchRecruits();
+      recruitsStore.fetchAdminRecruits();
     };
 
     onMounted(() => {
-      recruitsStore.fetchRecruits();
+      recruitsStore.fetchAdminRecruits();
     });
 
     return {
@@ -380,6 +427,7 @@ export default {
       removeExperience,
       submitForm,
       deleteRecruit,
+      toggleShow,
       refreshData,
     };
   },
