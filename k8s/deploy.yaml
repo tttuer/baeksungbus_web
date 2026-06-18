@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baeksungbus-web
+  namespace: baeksungbus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: baeksungbus-web
+  template:
+    metadata:
+      labels:
+        app: baeksungbus-web
+    spec:
+      imagePullSecrets:
+        - name: dockerhub-registry
+      containers:
+        - name: web
+          image: ghcr.io/your-org/baeksungbus-web:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4173
+              name: http
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: baeksungbus-web
+  namespace: baeksungbus
+spec:
+  type: ClusterIP
+  selector:
+    app: baeksungbus-web
+  ports:
+    - name: http
+      port: 4173
+      targetPort: http
