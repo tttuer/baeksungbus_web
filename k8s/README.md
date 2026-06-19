@@ -27,8 +27,15 @@ Required GitHub Environment or Repository secrets:
 - `SSH_PORT`
 - `SSH_USER`
 - `SSH_PRIVATE_KEY`
+- `KUBE_CONFIG_B64`
 - `VITE_API_URL`
 - `VITE_KAKAO_MAP_API_KEY`
+
+Create `KUBE_CONFIG_B64` on the k3s server:
+
+```bash
+sudo cat /etc/rancher/k3s/k3s.yaml | base64 -w0
+```
 
 Recommended `VITE_API_URL` value for same-host deployment:
 

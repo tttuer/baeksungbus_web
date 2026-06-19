@@ -59,19 +59,19 @@ jobs:
           NAMESPACE: ${{ env.NAMESPACE }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_B64 }}
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: WEB_DEPLOY_IMAGE,REMOTE_K8S_DIR,NAMESPACE,DOCKER_USERNAME,DOCKER_PASSWORD
+          envs: WEB_DEPLOY_IMAGE,REMOTE_K8S_DIR,NAMESPACE,DOCKER_USERNAME,DOCKER_PASSWORD,KUBE_CONFIG_B64
           script: |
             set -eu
 
             echo "Preparing kubeconfig..."
             mkdir -p "$HOME/.kube"
-            sudo cp /etc/rancher/k3s/k3s.yaml "$HOME/.kube/config"
-            sudo chown "$(id -u):$(id -g)" "$HOME/.kube/config"
+            printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config"
             chmod 600 "$HOME/.kube/config"
             export KUBECONFIG="$HOME/.kube/config"
 
