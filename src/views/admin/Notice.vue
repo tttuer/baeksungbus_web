@@ -368,9 +368,11 @@
     <div
       v-if="showModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeModal"
     >
       <div
         class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto"
+        @click.stop
       >
         <div class="p-6 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -410,16 +412,15 @@
           <!-- File Upload -->
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              첨부파일
+              첨부파일 끌어다 놓기
             </label>
-            <div class="mt-2">
-              <input
-                type="file"
-                @change="handleFileUpload"
-                class="form-input"
-                accept=".jpg,.jpeg,.png"
-              />
-            </div>
+            <FileDropZone
+              accept=".jpg,.jpeg,.png"
+              :max-size-mb="10"
+              title="공지 첨부 이미지를 끌어오세요"
+              description="JPG, PNG 파일만 업로드 가능 (최대 10MB)"
+              @selected="handleFileSelect"
+            />
             <p class="text-sm text-gray-500 mt-1">
               JPG, PNG 파일만 업로드 가능 (최대 10MB)
             </p>
@@ -562,10 +563,14 @@
 <script>
 import { ref, reactive, computed, onMounted } from "vue";
 import { useNoticesStore } from "@/stores/notices";
+import FileDropZone from "@/components/FileDropZone.vue";
 import { formatDate } from "@/utils/format";
 
 export default {
   name: "AdminNotice",
+  components: {
+    FileDropZone,
+  },
   setup() {
     const noticesStore = useNoticesStore();
 
@@ -613,12 +618,15 @@ export default {
     });
 
     const handleFileUpload = (event) => {
-      const file = event.target.files[0];
+      handleFileSelect(Array.from(event.target.files || []));
+    };
+
+    const handleFileSelect = (files) => {
+      const file = files[0];
       if (file) {
         // 파일 크기 검증 (10MB)
         if (file.size > 10 * 1024 * 1024) {
           alert("파일 크기는 10MB를 초과할 수 없습니다.");
-          event.target.value = "";
           return;
         }
 
@@ -626,7 +634,6 @@ export default {
         const allowedTypes = ["image/jpeg", "image/png"];
         if (!allowedTypes.includes(file.type)) {
           alert("지원하지 않는 파일 형식입니다.");
-          event.target.value = "";
           return;
         }
 
@@ -863,6 +870,7 @@ export default {
       togglePublish,
       deleteNotice,
       handleFileUpload,
+      handleFileSelect,
       removeFile,
       removeExistingFile,
       formatFileSize,

@@ -107,7 +107,7 @@
       
       <div class="sidebar-footer mt-auto p-4 border-t border-gray-200" v-if="isAdmin">
         <router-link 
-          to="/admin" 
+          to="/adm" 
           class="btn btn-primary w-full flex items-center justify-center"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

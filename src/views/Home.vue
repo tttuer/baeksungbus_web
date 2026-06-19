@@ -1,22 +1,59 @@
 <template>
   <div class="home">
-    <!-- Hero Section -->
-    <section
-      class="bg-gradient-to-r from-primary-600 to-primary-800 text-white py-16 rounded-lg mb-8"
-    >
-      <div class="text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4">백성운수</h1>
-        <p class="text-xl md:text-2xl mb-8 text-primary-100">
-          편리하고 안전한 안성시 대중교통
-        </p>
+    <!-- Service First Hero -->
+    <section class="bg-white border border-gray-200 rounded-lg shadow-sm p-5 md:p-8 mb-6">
+      <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6 items-center">
+        <div>
+          <p class="text-sm font-semibold text-primary-700 mb-2">
+            안성시 시내버스 안내
+          </p>
+          <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            백성운수
+          </h1>
+          <p class="text-gray-600 mb-5">
+            노선번호를 검색해 시간표를 확인하고, 운행 변경 공지와 분실물 문의를 빠르게 이용하세요.
+          </p>
+          <form class="flex flex-col sm:flex-row gap-3" @submit.prevent="goToScheduleSearch">
+            <label class="sr-only" for="home-route-search">노선번호 검색</label>
+            <input
+              id="home-route-search"
+              v-model="routeSearch"
+              type="text"
+              class="form-input min-h-[46px]"
+              placeholder="노선번호 입력 예: 70"
+            />
+            <button type="submit" class="btn btn-primary min-h-[46px] sm:w-32">
+              검색
+            </button>
+          </form>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <router-link to="/schedule" class="rounded-lg border border-gray-200 p-4 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+            <p class="text-sm text-gray-500">바로가기</p>
+            <p class="font-semibold text-gray-900 mt-1">노선/시간표</p>
+          </router-link>
+          <a href="tel:031-673-3456" class="rounded-lg border border-gray-200 p-4 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+            <p class="text-sm text-gray-500">전화문의</p>
+            <p class="font-semibold text-gray-900 mt-1">031-673-3456</p>
+          </a>
+          <router-link to="/lost/form" class="rounded-lg border border-gray-200 p-4 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+            <p class="text-sm text-gray-500">잃어버렸다면</p>
+            <p class="font-semibold text-gray-900 mt-1">분실물 신고</p>
+          </router-link>
+          <router-link to="/notice" class="rounded-lg border border-gray-200 p-4 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+            <p class="text-sm text-gray-500">운행 변경</p>
+            <p class="font-semibold text-gray-900 mt-1">공지 확인</p>
+          </router-link>
+        </div>
       </div>
     </section>
 
     <!-- Quick Links -->
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <router-link
         to="/schedule"
-        class="card p-6 hover:shadow-lg transition-shadow text-center group"
+        class="card p-5 hover:shadow-lg transition-shadow text-center group"
       >
         <div
           class="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center group-hover:bg-primary-200 transition-colors"
@@ -41,7 +78,7 @@
 
       <router-link
         to="/notice"
-        class="card p-6 hover:shadow-lg transition-shadow text-center group"
+        class="card p-5 hover:shadow-lg transition-shadow text-center group"
       >
         <div
           class="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center group-hover:bg-primary-200 transition-colors"
@@ -66,7 +103,7 @@
 
       <router-link
         to="/qa"
-        class="card p-6 hover:shadow-lg transition-shadow text-center group"
+        class="card p-5 hover:shadow-lg transition-shadow text-center group"
       >
         <div
           class="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center group-hover:bg-primary-200 transition-colors"
@@ -91,7 +128,7 @@
 
       <router-link
         to="/lost"
-        class="card p-6 hover:shadow-lg transition-shadow text-center group"
+        class="card p-5 hover:shadow-lg transition-shadow text-center group"
       >
         <div
           class="w-16 h-16 mx-auto mb-4 bg-primary-100 rounded-full flex items-center justify-center group-hover:bg-primary-200 transition-colors"
@@ -249,16 +286,24 @@
 
 <script>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useNoticesStore } from "@/stores/notices";
 import { formatDate } from "@/utils/format";
 
 export default {
   name: "Home",
   setup() {
+    const router = useRouter();
     const noticesStore = useNoticesStore();
+    const routeSearch = ref("");
     const recentNotices = ref([]);
 
-    
+    const goToScheduleSearch = () => {
+      router.push({
+        path: "/schedule",
+        query: routeSearch.value.trim() ? { route: routeSearch.value.trim() } : {},
+      });
+    };
 
     const loadRecentNotices = async () => {
       try {
@@ -274,8 +319,10 @@ export default {
     });
 
     return {
+      routeSearch,
       recentNotices,
       formatDate,
+      goToScheduleSearch,
     };
   },
 };

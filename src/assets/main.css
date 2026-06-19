@@ -100,6 +100,15 @@
   .modal-content {
     @apply relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white;
   }
+
+  .file-drop-zone {
+    @apply border-2 border-dashed border-primary-300 rounded-lg p-6 text-center bg-primary-50 cursor-pointer transition-colors;
+  }
+
+  .file-drop-zone:hover,
+  .file-drop-zone-active {
+    @apply border-primary-500 bg-blue-50;
+  }
 }
 
 @layer utilities {

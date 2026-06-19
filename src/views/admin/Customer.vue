@@ -117,6 +117,32 @@
 
     <!-- Search and Filters -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button
+          type="button"
+          @click="setAnswerStatus('')"
+          class="px-3 py-1.5 rounded-md text-sm font-medium border"
+          :class="answerStatus === '' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        >
+          전체
+        </button>
+        <button
+          type="button"
+          @click="setAnswerStatus('false')"
+          class="px-3 py-1.5 rounded-md text-sm font-medium border"
+          :class="answerStatus === 'false' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        >
+          미답변만
+        </button>
+        <button
+          type="button"
+          @click="setAnswerStatus('true')"
+          class="px-3 py-1.5 rounded-md text-sm font-medium border"
+          :class="answerStatus === 'true' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        >
+          답변완료
+        </button>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-2"
@@ -260,7 +286,8 @@
             <tr
               v-for="inquiry in customerInquiries"
               :key="inquiry.id"
-              class="hover:bg-gray-50"
+              class="hover:bg-gray-50 cursor-pointer"
+              @click="openAnswerModal(inquiry)"
             >
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
@@ -338,13 +365,13 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
                   <button
-                    @click="openAnswerModal(inquiry)"
+                    @click.stop="openAnswerModal(inquiry)"
                     class="text-green-600 hover:text-green-800"
                   >
                     {{ inquiry.done ? '답변수정' : '답변하기' }}
                   </button>
                   <button
-                    @click="deleteInquiry(inquiry.id)"
+                    @click.stop="deleteInquiry(inquiry.id)"
                     class="text-red-600 hover:text-red-800"
                   >
                     문의 삭제
@@ -508,6 +535,12 @@ export default {
       await fetchCustomerInquiries();
     };
 
+    const setAnswerStatus = async (status) => {
+      answerStatus.value = status;
+      currentPage.value = 1;
+      await fetchCustomerInquiries();
+    };
+
     const refreshData = async () => {
       await fetchCustomerInquiries();
       await qasStore.fetchUnansweredCount()
@@ -647,6 +680,7 @@ export default {
       formatDate,
       search,
       resetFilters,
+      setAnswerStatus,
       refreshData,
       goToPage,
       getPageNumbers,

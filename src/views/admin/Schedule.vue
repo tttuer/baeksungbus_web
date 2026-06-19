@@ -312,9 +312,11 @@
     <div
       v-if="showModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeModal"
     >
       <div
         class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto"
+        @click.stop
       >
         <div class="p-6 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">
@@ -378,15 +380,16 @@
             <!-- 이미지 업로드 -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2"
-                >노선 시간표 (여러 개 선택 가능)</label
+                >노선 시간표 끌어다 놓기 (여러 개 선택 가능)</label
               >
               <div class="space-y-4">
-                <input
-                  type="file"
-                  @change="handleImageUpload"
+                <FileDropZone
                   accept="image/*"
                   multiple
-                  class="form-input"
+                  :max-size-mb="5"
+                  title="시간표 이미지를 끌어오세요"
+                  description="여러 장 선택 가능, 이미지 파일만 업로드 가능 (각 5MB 이하)"
+                  @selected="handleImageFiles"
                 />
                 <div v-if="imagePreviews.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div 
@@ -501,17 +504,16 @@
                 <!-- 이미지 업로드 -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >노선 시간표 (여러 개 선택 가능)</label
+                    >노선 시간표 끌어다 놓기 (여러 개 선택 가능)</label
                   >
                   <div class="space-y-4">
-                    <input
-                      type="file"
-                      @change="
-                        (event) => handleMultipleImageUpload(event, index)
-                      "
+                    <FileDropZone
                       accept="image/*"
                       multiple
-                      class="form-input"
+                      :max-size-mb="5"
+                      title="시간표 이미지를 끌어오세요"
+                      description="여러 장 선택 가능, 이미지 파일만 업로드 가능 (각 5MB 이하)"
+                      @selected="(files) => handleMultipleImageFiles(files, index)"
                     />
                     <div
                       v-if="route.imagePreviews && route.imagePreviews.length > 0"
@@ -587,9 +589,13 @@
 <script>
 import { ref, reactive, computed, onMounted } from "vue";
 import { useSchedulesStore } from "@/stores/schedules";
+import FileDropZone from "@/components/FileDropZone.vue";
 
 export default {
   name: "AdminSchedule",
+  components: {
+    FileDropZone,
+  },
   setup() {
     const schedulesStore = useSchedulesStore();
 
@@ -803,7 +809,11 @@ export default {
     };
 
     const handleImageUpload = (event) => {
-      const files = Array.from(event.target.files);
+      handleImageFiles(Array.from(event.target.files || []));
+      event.target.value = "";
+    };
+
+    const handleImageFiles = (files) => {
       
       for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
@@ -830,8 +840,6 @@ export default {
         };
         reader.readAsDataURL(file);
       }
-      
-      event.target.value = "";
     };
 
     const removeImage = (index) => {
@@ -842,7 +850,11 @@ export default {
     };
 
     const handleMultipleImageUpload = (event, routeIndex) => {
-      const files = Array.from(event.target.files);
+      handleMultipleImageFiles(Array.from(event.target.files || []), routeIndex);
+      event.target.value = "";
+    };
+
+    const handleMultipleImageFiles = (files, routeIndex) => {
       
       for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
@@ -876,8 +888,6 @@ export default {
         };
         reader.readAsDataURL(file);
       }
-      
-      event.target.value = "";
     };
 
     const removeMultipleImage = (routeIndex, imageIndex) => {
@@ -1039,6 +1049,8 @@ export default {
       handleImageUpload,
       removeImage,
       handleMultipleImageUpload,
+      handleImageFiles,
+      handleMultipleImageFiles,
       removeMultipleImage,
       submitSchedule,
       viewSchedule,

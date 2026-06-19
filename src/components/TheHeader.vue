@@ -73,7 +73,7 @@
         <div class="hidden md:flex items-center space-x-4">
           <router-link 
             v-if="isAuthenticated && isAdmin" 
-            to="/admin" 
+            to="/adm" 
             class="text-white hover:text-primary-200 px-3 py-2 rounded-md text-sm font-medium transition-colors"
           >
             관리자
@@ -172,7 +172,7 @@
           <div v-if="isAuthenticated" class="border-t border-primary-700 pt-4">
             <router-link 
               v-if="isAdmin" 
-              to="/admin" 
+              to="/adm" 
               class="text-white hover:text-primary-200 block px-3 py-2 rounded-md text-base font-medium"
               @click="closeMobileMenu"
             >

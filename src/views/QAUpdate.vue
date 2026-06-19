@@ -5,6 +5,14 @@
       <div class="spinner"></div>
     </div>
 
+    <PasswordModal
+      v-if="showPasswordModal"
+      v-model="passwordInput"
+      :loading="isVerifying"
+      @submit="verifyPassword"
+      @cancel="goBack"
+    />
+
     <!-- Update Form -->
     <div v-else-if="qa" class="space-y-6">
       <!-- Page Header -->
@@ -77,16 +85,125 @@
             />
           </div>
 
+          <div
+            v-if="isLostQA()"
+            class="mb-6 rounded-lg border border-primary-100 bg-primary-50 p-4"
+          >
+            <h2 class="text-base font-semibold text-gray-900 mb-1">
+              분실 상황
+            </h2>
+            <p class="text-sm text-gray-600 mb-4">
+              분실 당시 정보를 항목별로 수정할 수 있습니다.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  노선번호
+                </label>
+                <input
+                  v-model="form.routeNumber"
+                  type="text"
+                  class="form-input"
+                  placeholder="예: 70, 370"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  분실 추정 일시
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    v-model="form.lostDate"
+                    type="date"
+                    class="form-input"
+                    aria-label="분실 추정 날짜"
+                  />
+                  <input
+                    v-model="form.lostTime"
+                    type="time"
+                    class="form-input"
+                    aria-label="분실 추정 시간"
+                  />
+                </div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <button
+                    v-for="time in quickTimeOptions"
+                    :key="time.value"
+                    type="button"
+                    class="px-3 py-1.5 text-xs font-medium rounded border"
+                    :class="
+                      form.lostTime === time.value
+                        ? 'bg-primary-600 text-white border-primary-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    "
+                    @click="selectLostTime(time.value)"
+                  >
+                    {{ time.label }}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  탑승/하차 정류장
+                </label>
+                <input
+                  v-model="form.stopInfo"
+                  type="text"
+                  class="form-input"
+                  placeholder="예: 안성터미널 승차, 중앙대 하차"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  버스 안 위치
+                </label>
+                <input
+                  v-model="form.busPosition"
+                  type="text"
+                  class="form-input"
+                  placeholder="예: 뒷문 근처, 맨 뒷좌석"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  물건 종류
+                </label>
+                <input
+                  v-model="form.itemType"
+                  type="text"
+                  class="form-input"
+                  placeholder="예: 지갑, 휴대폰, 가방"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  색상/특징
+                </label>
+                <input
+                  v-model="form.itemFeature"
+                  type="text"
+                  class="form-input"
+                  placeholder="예: 검은색, 이름표 있음"
+                />
+              </div>
+            </div>
+          </div>
+
           <!-- Content -->
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              내용 <span class="text-red-500">*</span>
+              {{ isLostQA() ? "상세 내용" : "내용" }}
+              <span class="text-red-500">*</span>
             </label>
             <textarea
               v-model="form.content"
               rows="8"
               class="form-textarea"
-              placeholder="문의 내용을 자세히 작성해주세요"
+              :placeholder="
+                isLostQA()
+                  ? '물건의 특징, 분실 당시 상황, 연락 가능한 시간 등을 적어주세요'
+                  : '문의 내용을 자세히 작성해주세요'
+              "
               required
             ></textarea>
             <p class="text-sm text-gray-500 mt-1">
@@ -172,16 +289,15 @@
           <!-- File Upload -->
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              첨부파일
+              새 첨부파일 끌어다 놓기
             </label>
-            <div class="mt-2">
-              <input
-                type="file"
-                @change="handleFileUpload"
-                class="form-input"
-                accept=".jpg,.jpeg,.png"
-              />
-            </div>
+            <FileDropZone
+              accept=".jpg,.jpeg,.png"
+              :max-size-mb="5"
+              title="새 첨부 이미지를 끌어오세요"
+              description="JPG, PNG 파일만 업로드 가능 (최대 5MB, 기존 파일은 삭제됩니다)"
+              @selected="handleFileSelect"
+            />
             <p class="text-sm text-gray-500 mt-1">
               JPG, PNG 파일만 업로드 가능 (최대 5MB, 기존 파일은 삭제됩니다)
             </p>
@@ -301,9 +417,16 @@
 import { ref, reactive, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
+import FileDropZone from "@/components/FileDropZone.vue";
+import PasswordModal from "@/components/PasswordModal.vue";
+import api from "@/services/api";
 
 export default {
   name: "QAUpdate",
+  components: {
+    FileDropZone,
+    PasswordModal,
+  },
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -312,6 +435,9 @@ export default {
     const qa = ref(null);
     const isLoading = ref(true);
     const isSubmitting = ref(false);
+    const showPasswordModal = ref(false);
+    const passwordInput = ref("");
+    const isVerifying = ref(false);
 
     const form = reactive({
       writer: "",
@@ -320,17 +446,40 @@ export default {
       category: "",
       title: "",
       content: "",
+      routeNumber: "",
+      lostDate: "",
+      lostTime: "",
+      stopInfo: "",
+      busPosition: "",
+      itemType: "",
+      itemFeature: "",
       new_file: null,
       remove_current_file: false,
     });
 
+    const quickTimeOptions = [
+      { label: "출근 07:00", value: "07:00" },
+      { label: "오전 09:00", value: "09:00" },
+      { label: "점심 12:00", value: "12:00" },
+      { label: "오후 15:00", value: "15:00" },
+      { label: "퇴근 18:00", value: "18:00" },
+      { label: "저녁 20:00", value: "20:00" },
+    ];
+
+    const selectLostTime = (time) => {
+      form.lostTime = time;
+    };
+
     const handleFileUpload = (event) => {
-      const file = event.target.files[0];
+      handleFileSelect(Array.from(event.target.files || []));
+    };
+
+    const handleFileSelect = (files) => {
+      const file = files[0];
       if (file) {
         // 파일 크기 검증 (10MB)
         if (file.size > 5 * 1024 * 1024) {
           alert("파일 크기는 5MB를 초과할 수 없습니다.");
-          event.target.value = "";
           return;
         }
 
@@ -338,7 +487,6 @@ export default {
         const allowedTypes = ["image/jpeg", "image/png"];
         if (!allowedTypes.includes(file.type)) {
           alert("이미지 파일만 업로드할 수 있습니다.");
-          event.target.value = "";
           return;
         }
 
@@ -371,10 +519,131 @@ export default {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    const loadQA = async () => {
+    const isLostQA = () => {
+      return qa.value?.qa_type === "LOST";
+    };
+
+    const parseLostContent = (content) => {
+      if (!content || !content.includes("[분실 상황]")) {
+        return { details: {}, body: content || "" };
+      }
+
+      const [detailsBlock = "", bodyBlock = ""] = content.split("[상세 내용]");
+      const details = {};
+
+      detailsBlock
+        .replace("[분실 상황]", "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .forEach((line) => {
+          const separatorIndex = line.indexOf(":");
+          if (separatorIndex === -1) return;
+          const label = line.slice(0, separatorIndex).trim();
+          const value = line.slice(separatorIndex + 1).trim();
+          details[label] = value;
+        });
+
+      return {
+        details,
+        body: bodyBlock.trim(),
+      };
+    };
+
+    const toLostDateTimeParts = (value) => {
+      if (!value) return { date: "", time: "" };
+
+      const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (isoMatch) {
+        const [, year, month, day, hour, minute] = isoMatch;
+        return { date: `${year}-${month}-${day}`, time: `${hour}:${minute}` };
+      }
+
+      const koreanMatch = value.match(
+        /^(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일\s*(\d{1,2}):(\d{2})/
+      );
+      if (!koreanMatch) return { date: "", time: "" };
+
+      const [, year, month, day, hour, minute] = koreanMatch;
+      return {
+        date: `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`,
+        time: `${hour.padStart(2, "0")}:${minute}`,
+      };
+    };
+
+    const formatLostDateTime = (date, time) => {
+      if (!date && !time) return "";
+      if (!date) return time || "";
+      if (!time) return date;
+      const [year, month, day] = date.split("-");
+      return `${year}년 ${month}월 ${day}일 ${time}`;
+    };
+
+    const buildLostContent = () => {
+      const lostDetails = [
+        ["노선번호", form.routeNumber],
+        ["분실 추정 일시", formatLostDateTime(form.lostDate, form.lostTime)],
+        ["탑승/하차 정류장", form.stopInfo],
+        ["버스 안 위치", form.busPosition],
+        ["물건 종류", form.itemType],
+        ["색상/특징", form.itemFeature],
+      ]
+        .filter(([, value]) => value && String(value).trim())
+        .map(([label, value]) => `${label}: ${value}`)
+        .join("\n");
+
+      return lostDetails
+        ? `[분실 상황]\n${lostDetails}\n\n[상세 내용]\n${form.content}`
+        : form.content;
+    };
+
+    const getStoredAccess = () => {
+      return sessionStorage.getItem(`qaAccess:${route.params.id}`);
+    };
+
+    const canFetchDetail = () => {
+      const storedAccess = getStoredAccess();
+      return storedAccess === "authenticated";
+    };
+
+    const verifyPassword = async () => {
+      try {
+        isVerifying.value = true;
+
+        await api.get(`/api/qas/${route.params.id}/check_password`, {
+          params: { password: passwordInput.value },
+        });
+
+        sessionStorage.setItem(`qaAccess:${route.params.id}`, "authenticated");
+        showPasswordModal.value = false;
+        passwordInput.value = "";
+        await loadQA({ force: true });
+      } catch (error) {
+        if (error.response?.status === 403) {
+          alert("비밀번호가 올바르지 않습니다.");
+        } else {
+          console.error("비밀번호 확인 실패:", error);
+          alert("비밀번호 확인 중 오류가 발생했습니다.");
+        }
+        passwordInput.value = "";
+      } finally {
+        isVerifying.value = false;
+      }
+    };
+
+    const goBack = () => {
+      router.push("/qa");
+    };
+
+    const loadQA = async ({ force = false } = {}) => {
       try {
         isLoading.value = true;
         const id = route.params.id;
+
+        if (!force && !canFetchDetail()) {
+          showPasswordModal.value = true;
+          return;
+        }
 
         qa.value = await qasStore.fetchQAById(id);
 
@@ -388,9 +657,23 @@ export default {
         // 폼에 기존 데이터 설정
         form.writer = qa.value.writer || "";
         form.email = qa.value.email || "";
-        form.password = qa.value.password || "";
+        form.password = "";
         form.title = qa.value.title || "";
-        form.content = qa.value.content || "";
+
+        if (isLostQA()) {
+          const { details, body } = parseLostContent(qa.value.content || "");
+          const lostDateTime = toLostDateTimeParts(details["분실 추정 일시"]);
+          form.routeNumber = details["노선번호"] || "";
+          form.lostDate = lostDateTime.date;
+          form.lostTime = lostDateTime.time;
+          form.stopInfo = details["탑승/하차 정류장"] || "";
+          form.busPosition = details["버스 안 위치"] || "";
+          form.itemType = details["물건 종류"] || "";
+          form.itemFeature = details["색상/특징"] || "";
+          form.content = body || "";
+        } else {
+          form.content = qa.value.content || "";
+        }
       } catch (error) {
         console.error("Q&A 로드 실패:", error);
         qa.value = null;
@@ -438,7 +721,7 @@ export default {
         formData.append("email", form.email);
         formData.append("password", form.password);
         formData.append("title", form.title);
-        formData.append("content", form.content);
+        formData.append("content", isLostQA() ? buildLostContent() : form.content);
 
         // keepAttachment 로직 수정
         if (form.remove_current_file) {
@@ -474,11 +757,20 @@ export default {
       form,
       isLoading,
       isSubmitting,
+      showPasswordModal,
+      passwordInput,
+      isVerifying,
       handleFileUpload,
+      handleFileSelect,
       removeNewFile,
       removeCurrentFile,
       restoreCurrentFile,
       formatFileSize,
+      isLostQA,
+      quickTimeOptions,
+      selectLostTime,
+      verifyPassword,
+      goBack,
       submitForm,
     };
   },

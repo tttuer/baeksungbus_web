@@ -97,8 +97,10 @@
             <img
               :src="getImageUrl(notice.attachment)"
               :alt="notice.attachment_filename"
-              class="max-w-7/10 max-h-7/10 object-contain rounded-lg shadow-sm"
+              class="max-w-full max-h-80 object-contain rounded-lg shadow-sm cursor-zoom-in hover:opacity-90"
+              @click="openImageViewer(getImageUrl(notice.attachment), notice.attachment_filename)"
             />
+            <p class="text-xs text-gray-500 mt-2">이미지를 클릭하면 크게 볼 수 있습니다.</p>
           </div>
         </div>
         <div class="prose prose-lg max-w-none">
@@ -222,6 +224,32 @@
         공지사항 목록으로
       </router-link>
     </div>
+
+    <div
+      v-if="imageViewer.show"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[60] p-4"
+      @click.self="closeImageViewer"
+    >
+      <button
+        type="button"
+        class="absolute top-4 right-4 text-white hover:text-gray-300"
+        @click="closeImageViewer"
+      >
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="max-w-6xl max-h-[90vh]" @click.stop>
+        <img
+          :src="imageViewer.src"
+          :alt="imageViewer.alt"
+          class="max-w-full max-h-[85vh] object-contain"
+        />
+        <p v-if="imageViewer.alt" class="text-white text-center mt-3 text-sm">
+          {{ imageViewer.alt }}
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -244,6 +272,11 @@ export default {
     const previousNotice = ref(null);
     const nextNotice = ref(null);
     const isLoading = ref(true);
+    const imageViewer = ref({
+      show: false,
+      src: "",
+      alt: "",
+    });
 
     const canEdit = computed(() => authStore.isAdmin);
     const canDelete = computed(() => authStore.isAdmin);
@@ -333,6 +366,14 @@ export default {
       window.print();
     };
 
+    const openImageViewer = (src, alt = "") => {
+      imageViewer.value = { show: true, src, alt };
+    };
+
+    const closeImageViewer = () => {
+      imageViewer.value = { show: false, src: "", alt: "" };
+    };
+
     const downloadFile = () => {
       if (notice.value.file_data && notice.value.file_name) {
         const blob = new Blob([notice.value.file_data]);
@@ -348,7 +389,7 @@ export default {
     };
 
     const goToEdit = () => {
-      router.push(`/admin/notice/edit/${notice.value.id}`);
+      router.push("/adm/notice");
     };
 
     const deleteNotice = async () => {
@@ -403,6 +444,7 @@ export default {
       previousNotice,
       nextNotice,
       isLoading,
+      imageViewer,
       canEdit,
       canDelete,
       getTypeClass,
@@ -411,6 +453,8 @@ export default {
       formatContent,
       shareNotice,
       printNotice,
+      openImageViewer,
+      closeImageViewer,
       downloadFile,
       goToEdit,
       deleteNotice,

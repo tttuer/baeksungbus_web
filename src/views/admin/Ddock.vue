@@ -257,8 +257,12 @@
     </div>
 
     <!-- Upload Modal -->
-    <div v-if="showUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+    <div
+      v-if="showUploadModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeUploadModal"
+    >
+      <div class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto" @click.stop>
         <div class="p-6 border-b border-gray-200">
           <div class="flex items-center justify-between">
             <h3 class="text-lg font-semibold text-gray-900">사진 업로드</h3>
@@ -275,7 +279,8 @@
           <div
             @drop="onFileDrop"
             @dragover.prevent
-            @dragenter.prevent
+            @dragenter.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
             class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-400 transition-colors"
             :class="{ 'border-primary-400 bg-primary-50': isDragging }"
           >
@@ -376,8 +381,12 @@
     </div>
 
     <!-- Image Viewer Modal -->
-    <div v-if="showImageViewer" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
-      <div class="relative max-w-screen-lg max-h-screen">
+    <div
+      v-if="showImageViewer"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+      @click.self="closeImageViewer"
+    >
+      <div class="relative max-w-screen-lg max-h-screen" @click.stop>
         <button
           @click="closeImageViewer"
           class="absolute top-4 right-4 text-white hover:text-gray-300 z-10"

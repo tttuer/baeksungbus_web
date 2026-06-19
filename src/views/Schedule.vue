@@ -105,7 +105,7 @@
                 <img
                   :src="`data:image/jpeg;base64,${schedule.images[0].data}`"
                   :alt="schedule.images[0].filename || '노선 시간표'"
-                  class="w-full h-48 object-cover rounded-lg shadow-sm cursor-pointer"
+                  class="w-full h-48 object-contain bg-gray-50 rounded-lg shadow-sm cursor-pointer"
                   @click="openTimetableModal(schedule)"
                 />
                 <div v-if="schedule.images.length > 1" class="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
@@ -118,7 +118,7 @@
               <img
                 :src="`data:image/jpeg;base64,${schedule.image_data}`"
                 :alt="schedule.image_filename || '노선 시간표'"
-                class="w-full h-48 object-cover rounded-lg shadow-sm cursor-pointer"
+                class="w-full h-48 object-contain bg-gray-50 rounded-lg shadow-sm cursor-pointer"
                 @click="openTimetableModal(schedule)"
               />
             </div>
@@ -145,6 +145,13 @@
                 <span v-if="schedule.images && schedule.images.length > 1" class="ml-1 text-xs bg-blue-500 px-1 rounded">
                   {{ schedule.images.length }}장
                 </span>
+              </button>
+              <button
+                v-if="(schedule.images && schedule.images.length > 0) || schedule.image_data"
+                @click="downloadCurrentScheduleImage(schedule)"
+                class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center"
+              >
+                시간표 이미지 저장
               </button>
               
               <button
@@ -218,7 +225,25 @@
           </div>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 md:p-6">
+          <div class="flex flex-wrap justify-end gap-2 mb-4">
+            <button
+              v-if="getScheduleImages().length > 0"
+              type="button"
+              @click="printTimetable"
+              class="btn btn-outline btn-sm"
+            >
+              인쇄
+            </button>
+            <button
+              v-if="getScheduleImages().length > 0"
+              type="button"
+              @click="downloadCurrentScheduleImage(selectedSchedule)"
+              class="btn btn-outline btn-sm"
+            >
+              이미지 저장
+            </button>
+          </div>
           <div v-if="getScheduleImages().length > 0" class="text-center">
             <!-- 이미지 슬라이더 -->
             <div class="relative">
@@ -294,6 +319,7 @@
 
 <script>
 import { ref, reactive, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { useSchedulesStore } from "@/stores/schedules";
 
 export default {
@@ -305,6 +331,7 @@ export default {
     const currentImageIndex = ref(0);
 
     const schedulesStore = useSchedulesStore();
+    const route = useRoute();
 
     const filters = reactive({
       departure: "",
@@ -404,8 +431,40 @@ export default {
       window.open(url, "_blank");
     };
 
+    const downloadCurrentScheduleImage = (schedule) => {
+      if (!schedule) return;
+      let imageSrc = "";
+      let filename = `${schedule.route_number || "route"}-timetable.jpg`;
+
+      if (schedule.images && schedule.images.length > 0) {
+        const image = schedule.images[currentImageIndex.value] || schedule.images[0];
+        imageSrc = `data:image/jpeg;base64,${image.data}`;
+        filename = image.filename || filename;
+      } else if (schedule.image_data) {
+        imageSrc = `data:image/jpeg;base64,${schedule.image_data}`;
+        filename = schedule.image_filename || filename;
+      }
+
+      if (!imageSrc) return;
+
+      const link = document.createElement("a");
+      link.href = imageSrc;
+      link.download = filename;
+      link.click();
+    };
+
+    const printTimetable = () => {
+      window.print();
+    };
+
     onMounted(() => {
-      schedulesStore.fetchSchedules();
+      const routeNumber = route.query.route;
+      if (routeNumber) {
+        searchQuery.value = String(routeNumber);
+        applyFilters();
+      } else {
+        schedulesStore.fetchSchedules();
+      }
     });
 
     return {
@@ -426,6 +485,8 @@ export default {
       prevImage,
       openNaverMap,
       goToDetail,
+      downloadCurrentScheduleImage,
+      printTimetable,
     };
   },
 };

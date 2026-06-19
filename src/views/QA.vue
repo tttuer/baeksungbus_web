@@ -1,66 +1,12 @@
 <template>
   <div class="qa">
-    <!-- Password Modal -->
-    <div
+    <PasswordModal
       v-if="showPasswordModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <h3 class="text-lg font-semibold mb-4">비밀번호 확인</h3>
-        <p class="text-gray-600 mb-4">이 글을 보려면 비밀번호가 필요합니다.</p>
-        <form @submit.prevent="checkPassword">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2"
-              >비밀번호</label
-            >
-            <input
-              v-model="passwordInput"
-              type="password"
-              class="form-input"
-              placeholder="비밀번호를 입력하세요"
-              required
-              ref="passwordInputRef"
-            />
-          </div>
-          <div class="flex gap-2 justify-end">
-            <button
-              type="button"
-              @click="closePasswordModal"
-              class="btn btn-outline"
-            >
-              취소
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              :disabled="isCheckingPassword"
-            >
-              <svg
-                v-if="isCheckingPassword"
-                class="w-4 h-4 mr-2 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
-              {{ isCheckingPassword ? "확인 중..." : "확인" }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      v-model="passwordInput"
+      :loading="isCheckingPassword"
+      @submit="checkPassword"
+      @cancel="closePasswordModal"
+    />
     <!-- Page Header -->
     <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
       <div
@@ -341,14 +287,18 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
+import PasswordModal from "@/components/PasswordModal.vue";
 import api from "@/services/api";
 import { formatDate } from "@/utils/format";
 
 export default {
   name: "QA",
+  components: {
+    PasswordModal,
+  },
   setup() {
     const router = useRouter();
     const qasStore = useQAsStore();
@@ -359,7 +309,6 @@ export default {
     const showPasswordModal = ref(false);
     const passwordInput = ref("");
     const isCheckingPassword = ref(false);
-    const passwordInputRef = ref(null);
     const selectedItemId = ref(null);
 
     const isLoading = computed(() => qasStore.isLoading);
@@ -443,15 +392,7 @@ export default {
 
     const goToDetail = async (item) => {
       selectedItemId.value = item.id;
-
-      // 비밀번호가 설정된 글이면 비밀번호 모달 표시
-      if (item.hidden) {
-        showPasswordModal.value = true;
-        await nextTick();
-        passwordInputRef.value?.focus();
-      } else {
-        router.push(`/qa/${item.id}`);
-      }
+      showPasswordModal.value = true;
     };
 
     const checkPassword = async () => {
@@ -464,9 +405,10 @@ export default {
 
         showPasswordModal.value = false;
         passwordInput.value = "";
+        sessionStorage.setItem(`qaAccess:${selectedItemId.value}`, "authenticated");
         router.push({
           path: `/qa/${selectedItemId.value}`,
-          query: { authenticated: 'true' }
+          query: { from: "qa" },
         });
       } catch (error) {
         if (error.response?.status === 403) {
@@ -506,7 +448,6 @@ export default {
       showPasswordModal,
       passwordInput,
       isCheckingPassword,
-      passwordInputRef,
       checkPassword,
       closePasswordModal,
     };

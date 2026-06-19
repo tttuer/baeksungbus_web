@@ -5,30 +5,13 @@
       <div class="spinner"></div>
     </div>
 
-    <!-- Password Modal -->
-    <div v-if="showPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 w-96">
-        <h3 class="text-lg font-semibold mb-4">비밀번호 입력</h3>
-        <p class="text-gray-600 mb-4">이 Q&A를 보려면 비밀번호를 입력해주세요.</p>
-        <form @submit.prevent="verifyPassword">
-          <input
-            v-model="passwordInput"
-            type="password"
-            class="form-input w-full mb-4"
-            placeholder="비밀번호를 입력하세요"
-            required
-          />
-          <div class="flex gap-2">
-            <button type="submit" class="btn btn-primary flex-1" :disabled="isVerifying">
-              {{ isVerifying ? '확인 중...' : '확인' }}
-            </button>
-            <button type="button" @click="goBack" class="btn btn-outline flex-1">
-              취소
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <PasswordModal
+      v-if="showPasswordModal"
+      v-model="passwordInput"
+      :loading="isVerifying"
+      @submit="verifyPassword"
+      @cancel="goBack"
+    />
 
     <!-- QA Content -->
     <div v-else-if="qa && isAuthenticated" class="space-y-6">
@@ -159,14 +142,46 @@
             <img
               :src="getImageUrl(qa.attachment)"
               :alt="qa.attachment_filename"
-              class="max-w-7/10 max-h-7/10 object-contain rounded-lg shadow-sm"
+              class="max-w-full max-h-80 object-contain rounded-lg shadow-sm cursor-zoom-in hover:opacity-90"
+              @click="openImageViewer(getImageUrl(qa.attachment), qa.attachment_filename)"
             />
+            <p class="text-xs text-gray-500 mt-2">이미지를 클릭하면 크게 볼 수 있습니다.</p>
           </div>
         </div>
 
         <!-- Question Content -->
-        <div class="prose prose-lg max-w-none mb-6">
-          <div v-html="formatContent(qa.content)"></div>
+        <div class="mb-6">
+          <div v-if="getLostContentParts(qa.content).details.length > 0" class="space-y-6">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-900 mb-3">분실 상황</h2>
+              <div class="overflow-hidden rounded-lg border border-gray-200">
+                <table class="w-full text-sm">
+                  <tbody class="divide-y divide-gray-200">
+                    <tr
+                      v-for="detail in getLostContentParts(qa.content).details"
+                      :key="detail.label"
+                    >
+                      <th class="w-36 bg-gray-50 px-4 py-3 text-left font-medium text-gray-700">
+                        {{ detail.label }}
+                      </th>
+                      <td class="px-4 py-3 text-gray-900">
+                        {{ detail.value }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div v-if="getLostContentParts(qa.content).body">
+              <h2 class="text-lg font-semibold text-gray-900 mb-3">상세 내용</h2>
+              <div class="prose prose-lg max-w-none">
+                <div v-html="formatContent(getLostContentParts(qa.content).body)"></div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="prose prose-lg max-w-none">
+            <div v-html="formatContent(qa.content)"></div>
+          </div>
         </div>
       </div>
 
@@ -232,17 +247,27 @@
 
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2"
-              >첨부파일</label
+              >답변 첨부파일 끌어다 놓기</label
             >
-            <input
-              type="file"
-              @change="handleAnswerFile"
-              class="form-input"
+            <FileDropZone
               accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.hwp"
+              :max-size-mb="10"
+              title="답변 첨부파일을 끌어오세요"
+              description="JPG, PNG, PDF, DOC, HWP 파일만 업로드 가능 (최대 10MB)"
+              @selected="handleAnswerFileSelect"
             />
             <p class="text-sm text-gray-500 mt-1">
               JPG, PNG, PDF, DOC, HWP 파일만 업로드 가능 (최대 10MB)
             </p>
+            <div
+              v-if="answerForm.file"
+              class="mt-3 p-3 bg-gray-50 rounded-lg flex items-center justify-between"
+            >
+              <span class="text-sm text-gray-700">{{ answerForm.file.name }}</span>
+              <button type="button" class="text-red-600 text-sm" @click="answerForm.file = null">
+                삭제
+              </button>
+            </div>
           </div>
 
           <div class="flex gap-2">
@@ -343,6 +368,32 @@
         {{ getListTitle() }} 목록으로
       </router-link>
     </div>
+
+    <div
+      v-if="imageViewer.show"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[60] p-4"
+      @click.self="closeImageViewer"
+    >
+      <button
+        type="button"
+        class="absolute top-4 right-4 text-white hover:text-gray-300"
+        @click="closeImageViewer"
+      >
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="max-w-6xl max-h-[90vh]" @click.stop>
+        <img
+          :src="imageViewer.src"
+          :alt="imageViewer.alt"
+          class="max-w-full max-h-[85vh] object-contain"
+        />
+        <p v-if="imageViewer.alt" class="text-white text-center mt-3 text-sm">
+          {{ imageViewer.alt }}
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -351,10 +402,17 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
 import { useAuthStore } from "@/stores/auth";
+import FileDropZone from "@/components/FileDropZone.vue";
+import PasswordModal from "@/components/PasswordModal.vue";
+import api from "@/services/api";
 import { formatDate } from "@/utils/format";
 
 export default {
   name: "QADetail",
+  components: {
+    FileDropZone,
+    PasswordModal,
+  },
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -370,6 +428,11 @@ export default {
     const passwordInput = ref('');
     const isVerifying = ref(false);
     const isAuthenticated = ref(false);
+    const imageViewer = reactive({
+      show: false,
+      src: "",
+      alt: "",
+    });
 
     const answerForm = reactive({
       content: "",
@@ -399,6 +462,44 @@ export default {
     const formatContent = (content) => {
       if (!content) return "";
       return content.replace(/\n/g, "<br>");
+    };
+
+    const getLostContentParts = (content) => {
+      if (!content || !content.includes("[분실 상황]")) {
+        return { details: [], body: content || "" };
+      }
+
+      const [detailsBlock = "", bodyBlock = ""] = content.split("[상세 내용]");
+      const details = detailsBlock
+        .replace("[분실 상황]", "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const separatorIndex = line.indexOf(":");
+          if (separatorIndex === -1) return null;
+          return {
+            label: line.slice(0, separatorIndex).trim(),
+            value: formatLostDetailValue(
+              line.slice(0, separatorIndex).trim(),
+              line.slice(separatorIndex + 1).trim()
+            ),
+          };
+        })
+        .filter(Boolean);
+
+      return {
+        details,
+        body: bodyBlock.trim(),
+      };
+    };
+
+    const formatLostDetailValue = (label, value) => {
+      if (label !== "분실 추정 일시" || !value) return value;
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!match) return value;
+      const [, year, month, day, hour, minute] = match;
+      return `${year}년 ${month}월 ${day}일 ${hour}:${minute}`;
     };
 
     const getImageUrl = (imageData) => {
@@ -449,12 +550,27 @@ export default {
       }
     };
 
+    const openImageViewer = (src, alt = "") => {
+      imageViewer.src = src;
+      imageViewer.alt = alt;
+      imageViewer.show = true;
+    };
+
+    const closeImageViewer = () => {
+      imageViewer.show = false;
+      imageViewer.src = "";
+      imageViewer.alt = "";
+    };
+
     const handleAnswerFile = (event) => {
-      const file = event.target.files[0];
+      handleAnswerFileSelect(Array.from(event.target.files || []));
+    };
+
+    const handleAnswerFileSelect = (files) => {
+      const file = files[0];
       if (file) {
         if (file.size > 10 * 1024 * 1024) {
           alert("파일 크기는 10MB를 초과할 수 없습니다.");
-          event.target.value = "";
           return;
         }
         answerForm.file = file;
@@ -506,12 +622,12 @@ export default {
     };
 
     const getListRoute = () => {
-      if (!qa.value) return "/qa";
+      if (!qa.value) return route.query.from === "lost" ? "/lost" : "/qa";
       return qa.value.qa_type === "LOST" ? "/lost" : "/qa";
     };
 
     const getListTitle = () => {
-      if (!qa.value) return "Q&A";
+      if (!qa.value) return route.query.from === "lost" ? "분실물" : "Q&A";
       return qa.value.qa_type === "LOST" ? "분실물" : "Q&A";
     };
 
@@ -528,19 +644,24 @@ export default {
     const verifyPassword = async () => {
       try {
         isVerifying.value = true;
-        
-        // QA의 비밀번호와 비교
-        if (qa.value && qa.value.password && qa.value.password === passwordInput.value) {
-          isAuthenticated.value = true;
-          showPasswordModal.value = false;
-          passwordInput.value = '';
-        } else {
-          alert('비밀번호가 올바르지 않습니다.');
-          passwordInput.value = '';
-        }
+
+        await api.get(`/api/qas/${route.params.id}/check_password`, {
+          params: { password: passwordInput.value },
+        });
+
+        isAuthenticated.value = true;
+        showPasswordModal.value = false;
+        passwordInput.value = "";
+        sessionStorage.setItem(`qaAccess:${route.params.id}`, "authenticated");
+        await loadQA({ force: true });
       } catch (error) {
-        console.error('비밀번호 확인 실패:', error);
-        alert('비밀번호 확인 중 오류가 발생했습니다.');
+        if (error.response?.status === 403) {
+          alert("비밀번호가 올바르지 않습니다.");
+        } else {
+          console.error("비밀번호 확인 실패:", error);
+          alert("비밀번호 확인 중 오류가 발생했습니다.");
+        }
+        passwordInput.value = "";
       } finally {
         isVerifying.value = false;
       }
@@ -550,26 +671,41 @@ export default {
       // QA의 타입에 따라 적절한 목록으로 이동
       if (qa.value && qa.value.qa_type === "LOST") {
         router.push('/lost');
+      } else if (route.query.from === "lost") {
+        router.push("/lost");
       } else {
         router.push('/qa');
       }
     };
 
-    const loadQA = async () => {
+    const getStoredAccess = () => {
+      return sessionStorage.getItem(`qaAccess:${route.params.id}`);
+    };
+
+    const canFetchDetail = () => {
+      const storedAccess = getStoredAccess();
+      return (
+        authStore.isAdmin ||
+        storedAccess === "authenticated" ||
+        isAuthenticated.value
+      );
+    };
+
+    const loadQA = async ({ force = false } = {}) => {
       try {
         isLoading.value = true;
         const id = route.params.id;
 
+        if (!force && !canFetchDetail()) {
+          showPasswordModal.value = true;
+          isAuthenticated.value = false;
+          return;
+        }
+
         qa.value = await qasStore.fetchQAById(id);
 
-        // 관리자이거나 비밀번호가 없는 경우 바로 인증
-        // 또는 QA 목록에서 이미 인증되어 온 경우
-        if (authStore.isAdmin || !qa.value?.password || route.query.authenticated === 'true') {
-          isAuthenticated.value = true;
-        } else {
-          // 비밀번호가 있는 경우 모달 표시
-          showPasswordModal.value = true;
-        }
+        isAuthenticated.value = true;
+        showPasswordModal.value = false;
 
         // 이전/다음 Q&A 정보 (더미 데이터)
         if (parseInt(id) > 1) {
@@ -607,6 +743,7 @@ export default {
       passwordInput,
       isVerifying,
       isAuthenticated,
+      imageViewer,
       answerForm,
       canEditQA,
       canAnswer,
@@ -614,9 +751,13 @@ export default {
       getStatusLabel,
       formatDate,
       formatContent,
+      getLostContentParts,
       getImageUrl,
       downloadFile,
+      openImageViewer,
+      closeImageViewer,
       handleAnswerFile,
+      handleAnswerFileSelect,
       submitAnswer,
       cancelAnswer,
       deleteQA,

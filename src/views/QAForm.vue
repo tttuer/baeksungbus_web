@@ -93,16 +93,15 @@
         <!-- File Upload -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            첨부파일
+            첨부파일 끌어다 놓기
           </label>
-          <div class="mt-2">
-            <input
-              type="file"
-              @change="handleFileUpload"
-              class="form-input"
-              accept=".jpg,.jpeg,.png"
-            />
-          </div>
+          <FileDropZone
+            accept=".jpg,.jpeg,.png"
+            :max-size-mb="10"
+            title="첨부할 이미지를 끌어오세요"
+            description="JPG, PNG 파일만 업로드 가능 (최대 10MB)"
+            @selected="handleFileSelect"
+          />
           <p class="text-sm text-gray-500 mt-1">
             JPG, PNG 파일만 업로드 가능 (최대 10MB)
           </p>
@@ -261,10 +260,14 @@
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
+import FileDropZone from "@/components/FileDropZone.vue";
 import api from "@/services/api";
 
 export default {
   name: "QAForm",
+  components: {
+    FileDropZone,
+  },
   setup() {
     const router = useRouter();
     const qasStore = useQAsStore();
@@ -286,12 +289,15 @@ export default {
     });
 
     const handleFileUpload = (event) => {
-      const file = event.target.files[0];
+      handleFileSelect(Array.from(event.target.files || []));
+    };
+
+    const handleFileSelect = (files) => {
+      const file = files[0];
       if (file) {
         // 파일 크기 검증 (10MB)
         if (file.size > 10 * 1024 * 1024) {
           alert("파일 크기는 10MB를 초과할 수 없습니다.");
-          event.target.value = "";
           return;
         }
 
@@ -299,7 +305,6 @@ export default {
         const allowedTypes = ["image/jpeg", "image/png"];
         if (!allowedTypes.includes(file.type)) {
           alert("지원하지 않는 파일 형식입니다.");
-          event.target.value = "";
           return;
         }
 
@@ -425,6 +430,7 @@ export default {
       showPrivacyModal,
       captchaImage,
       handleFileUpload,
+      handleFileSelect,
       removeFile,
       formatFileSize,
       refreshCaptcha,

@@ -115,6 +115,32 @@
 
     <!-- Search and Filters -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button
+          type="button"
+          @click="setStatusFilter('')"
+          class="px-3 py-1.5 rounded-md text-sm font-medium border"
+          :class="statusFilter === '' ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        >
+          전체
+        </button>
+        <button
+          type="button"
+          @click="setStatusFilter('false')"
+          class="px-3 py-1.5 rounded-md text-sm font-medium border"
+          :class="statusFilter === 'false' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        >
+          처리 중
+        </button>
+        <button
+          type="button"
+          @click="setStatusFilter('true')"
+          class="px-3 py-1.5 rounded-md text-sm font-medium border"
+          :class="statusFilter === 'true' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
+        >
+          처리 완료
+        </button>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="col-span-2">
           <label class="block text-sm font-medium text-gray-700 mb-2"
@@ -260,7 +286,8 @@
             <tr
               v-for="item in lostItems"
               :key="item.id"
-              class="hover:bg-gray-50"
+              class="hover:bg-gray-50 cursor-pointer"
+              @click="openAnswerModal(item)"
             >
               <td class="px-6 py-4">
                 <div class="flex items-center">
@@ -340,13 +367,13 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
                   <button
-                    @click="openAnswerModal(item)"
+                    @click.stop="openAnswerModal(item)"
                     class="text-green-600 hover:text-green-800"
                   >
                     {{ item.done ? "답변수정" : "답변하기" }}
                   </button>
                   <button
-                    @click="deleteItem(item.id)"
+                    @click.stop="deleteItem(item.id)"
                     class="text-red-600 hover:text-red-800"
                   >
                     문의 삭제
@@ -445,9 +472,11 @@
     <div
       v-if="showDetailModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeDetailModal"
     >
       <div
         class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto"
+        @click.stop
       >
         <div class="p-6 border-b border-gray-200">
           <div class="flex items-center justify-between">
@@ -512,7 +541,36 @@
 
           <div>
             <label class="block text-sm font-medium text-gray-700">내용</label>
-            <div class="mt-1 p-3 bg-gray-50 rounded-md">
+            <div
+              v-if="getLostContentParts(selectedItem.content).details.length > 0"
+              class="mt-2 overflow-hidden rounded-lg border border-gray-200"
+            >
+              <table class="w-full text-sm">
+                <tbody class="divide-y divide-gray-200">
+                  <tr
+                    v-for="detail in getLostContentParts(selectedItem.content).details"
+                    :key="detail.label"
+                  >
+                    <th class="w-32 bg-gray-50 px-3 py-2 text-left font-medium text-gray-700">
+                      {{ detail.label }}
+                    </th>
+                    <td class="px-3 py-2 text-gray-900">
+                      {{ detail.value }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div
+                v-if="getLostContentParts(selectedItem.content).body"
+                class="border-t border-gray-200 p-3"
+              >
+                <p class="text-xs font-medium text-gray-500 mb-1">상세 내용</p>
+                <p class="text-sm text-gray-900 whitespace-pre-wrap">
+                  {{ getLostContentParts(selectedItem.content).body }}
+                </p>
+              </div>
+            </div>
+            <div v-else class="mt-1 p-3 bg-gray-50 rounded-md">
               <p class="text-sm text-gray-900 whitespace-pre-wrap">
                 {{ selectedItem.content }}
               </p>
@@ -523,6 +581,18 @@
             <label class="block text-sm font-medium text-gray-700 mb-2"
               >첨부파일</label
             >
+            <div
+              v-if="getAttachmentImageUrl(selectedItem.attachment)"
+              class="mb-3 rounded-lg border border-gray-200 bg-gray-50 p-3"
+            >
+              <img
+                :src="getAttachmentImageUrl(selectedItem.attachment)"
+                alt="분실물 첨부 이미지"
+                class="max-h-56 max-w-full object-contain rounded cursor-zoom-in hover:opacity-90"
+                @click="openImageViewer(getAttachmentImageUrl(selectedItem.attachment), '분실물 첨부 이미지')"
+              />
+              <p class="text-xs text-gray-500 mt-2">이미지를 클릭하면 크게 볼 수 있습니다.</p>
+            </div>
             <div class="flex items-center p-3 bg-gray-50 rounded-lg">
               <svg
                 class="w-8 h-8 text-gray-400 mr-3"
@@ -594,11 +664,37 @@
       @close="closeAnswerModal"
       @answered="onAnswered"
     />
+
+    <div
+      v-if="imageViewer.show"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[70] p-4"
+      @click.self="closeImageViewer"
+    >
+      <button
+        type="button"
+        class="absolute top-4 right-4 text-white hover:text-gray-300"
+        @click="closeImageViewer"
+      >
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="max-w-6xl max-h-[90vh]" @click.stop>
+        <img
+          :src="imageViewer.src"
+          :alt="imageViewer.alt"
+          class="max-w-full max-h-[85vh] object-contain"
+        />
+        <p v-if="imageViewer.alt" class="text-white text-center mt-3 text-sm">
+          {{ imageViewer.alt }}
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useQAsStore } from "@/stores/qas";
 import AnswerModal from "@/components/AnswerModal.vue";
 import { formatDate } from "@/utils/format";
@@ -619,6 +715,11 @@ export default {
     const selectedItem = ref(null);
     const showAnswerModal = ref(false);
     const selectedQA = ref(null);
+    const imageViewer = reactive({
+      show: false,
+      src: "",
+      alt: "",
+    });
 
     const isLoading = computed(() => qasStore.isLoading);
     const lostItems = computed(() => qasStore.qas);
@@ -656,6 +757,12 @@ export default {
       searchQuery.value = "";
       statusFilter.value = "";
       dateFilter.value = "";
+      currentPage.value = 1;
+      await fetchLostItems();
+    };
+
+    const setStatusFilter = async (status) => {
+      statusFilter.value = status;
       currentPage.value = 1;
       await fetchLostItems();
     };
@@ -748,6 +855,63 @@ export default {
       }
 
       return pages;
+    };
+
+    const getLostContentParts = (content) => {
+      if (!content || !content.includes("[분실 상황]")) {
+        return { details: [], body: content || "" };
+      }
+
+      const [detailsBlock = "", bodyBlock = ""] = content.split("[상세 내용]");
+      const details = detailsBlock
+        .replace("[분실 상황]", "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const separatorIndex = line.indexOf(":");
+          if (separatorIndex === -1) return null;
+          return {
+            label: line.slice(0, separatorIndex).trim(),
+            value: formatLostDetailValue(
+              line.slice(0, separatorIndex).trim(),
+              line.slice(separatorIndex + 1).trim()
+            ),
+          };
+        })
+        .filter(Boolean);
+
+      return {
+        details,
+        body: bodyBlock.trim(),
+      };
+    };
+
+    const getAttachmentImageUrl = (attachment) => {
+      if (!attachment || typeof attachment !== "string") return "";
+      if (attachment.startsWith("data:image/")) return attachment;
+      if (attachment.startsWith("http")) return attachment;
+      return `data:image/jpeg;base64,${attachment}`;
+    };
+
+    const openImageViewer = (src, alt = "") => {
+      imageViewer.src = src;
+      imageViewer.alt = alt;
+      imageViewer.show = true;
+    };
+
+    const closeImageViewer = () => {
+      imageViewer.show = false;
+      imageViewer.src = "";
+      imageViewer.alt = "";
+    };
+
+    const formatLostDetailValue = (label, value) => {
+      if (label !== "분실 추정 일시" || !value) return value;
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!match) return value;
+      const [, year, month, day, hour, minute] = match;
+      return `${year}년 ${month}월 ${day}일 ${hour}:${minute}`;
     };
 
     const viewDetail = (item) => {
@@ -852,13 +1016,19 @@ export default {
       selectedItem,
       showAnswerModal,
       selectedQA,
+      imageViewer,
       totalCount,
       formatDate,
       search,
       resetFilters,
+      setStatusFilter,
       refreshData,
       goToPage,
       getPageNumbers,
+      getLostContentParts,
+      getAttachmentImageUrl,
+      openImageViewer,
+      closeImageViewer,
       viewDetail,
       closeDetailModal,
       openAnswerModal,

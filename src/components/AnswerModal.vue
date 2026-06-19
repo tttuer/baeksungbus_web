@@ -2,9 +2,11 @@
   <div
     v-if="show"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    @click.self="closeModal"
   >
     <div
       class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto"
+      @click.stop
     >
       <!-- Modal Header -->
       <div class="p-6 border-b border-gray-200">
@@ -99,12 +101,43 @@
                 <img
                   :src="`data:image/jpeg;base64,${qa.attachment}`"
                   :alt="qa.attachment_filename"
-                  class="max-w-full max-h-40 object-contain rounded-lg"
+                  class="max-w-full max-h-52 object-contain rounded-lg cursor-zoom-in hover:opacity-90"
+                  @click="openImageViewer(`data:image/jpeg;base64,${qa.attachment}`, qa.attachment_filename)"
                 />
+                <p class="text-xs text-gray-500 mt-2">이미지를 클릭하면 크게 볼 수 있습니다.</p>
               </div>
             </div>
 
-            <p class="text-gray-600 mt-2">{{ qa.content }}</p>
+            <div
+              v-if="getLostContentParts(qa.content).details.length > 0"
+              class="mt-3 overflow-hidden rounded-lg border border-gray-200 bg-white"
+            >
+              <table class="w-full text-sm">
+                <tbody class="divide-y divide-gray-200">
+                  <tr
+                    v-for="detail in getLostContentParts(qa.content).details"
+                    :key="detail.label"
+                  >
+                    <th class="w-32 bg-gray-50 px-3 py-2 text-left font-medium text-gray-700">
+                      {{ detail.label }}
+                    </th>
+                    <td class="px-3 py-2 text-gray-900">
+                      {{ detail.value }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div
+                v-if="getLostContentParts(qa.content).body"
+                class="border-t border-gray-200 p-3"
+              >
+                <p class="text-xs font-medium text-gray-500 mb-1">상세 내용</p>
+                <p class="text-sm text-gray-700 whitespace-pre-wrap">
+                  {{ getLostContentParts(qa.content).body }}
+                </p>
+              </div>
+            </div>
+            <p v-else class="text-gray-600 mt-2">{{ qa.content }}</p>
           </div>
         </div>
 
@@ -118,6 +151,22 @@
 
         <!-- Answer Form -->
         <form @submit.prevent="submitAnswer" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              빠른 답변
+            </label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="template in answerTemplates"
+                :key="template.label"
+                type="button"
+                @click="applyAnswerTemplate(template.content)"
+                class="px-3 py-1.5 rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50"
+              >
+                {{ template.label }}
+              </button>
+            </div>
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
               {{ isEditMode ? "수정할 답변 내용 *" : "답변 내용 *" }}
@@ -181,6 +230,32 @@
         </form>
       </div>
     </div>
+
+    <div
+      v-if="imageViewer.show"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[70] p-4"
+      @click.self="closeImageViewer"
+    >
+      <button
+        type="button"
+        class="absolute top-4 right-4 text-white hover:text-gray-300"
+        @click="closeImageViewer"
+      >
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <div class="max-w-6xl max-h-[90vh]" @click.stop>
+        <img
+          :src="imageViewer.src"
+          :alt="imageViewer.alt"
+          class="max-w-full max-h-[85vh] object-contain"
+        />
+        <p v-if="imageViewer.alt" class="text-white text-center mt-3 text-sm">
+          {{ imageViewer.alt }}
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -217,6 +292,28 @@ export default {
     const answerContent = ref("");
     const currentAnswer = ref(null);
     const isEditMode = ref(false);
+    const imageViewer = reactive({
+      show: false,
+      src: "",
+      alt: "",
+    });
+    const answerTemplates = [
+      {
+        label: "확인 후 연락",
+        content:
+          "접수해주신 내용을 확인했습니다. 담당자가 확인 후 입력하신 이메일로 안내드리겠습니다.",
+      },
+      {
+        label: "추가 정보 요청",
+        content:
+          "확인을 위해 노선번호, 탑승 시간, 탑승/하차 정류장 정보를 추가로 알려주세요.",
+      },
+      {
+        label: "분실물 보관 안내",
+        content:
+          "문의하신 분실물이 확인되어 보관 중입니다. 방문 전 전화로 수령 가능 시간을 확인해주세요.",
+      },
+    ];
 
     const resetForm = () => {
       form.content = "";
@@ -231,7 +328,61 @@ export default {
       emit("close");
     };
 
-    
+    const applyAnswerTemplate = (content) => {
+      answerContent.value = answerContent.value.trim()
+        ? `${answerContent.value.trim()}\n\n${content}`
+        : content;
+    };
+
+    const getLostContentParts = (content) => {
+      if (!content || !content.includes("[분실 상황]")) {
+        return { details: [], body: content || "" };
+      }
+
+      const [detailsBlock = "", bodyBlock = ""] = content.split("[상세 내용]");
+      const details = detailsBlock
+        .replace("[분실 상황]", "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const separatorIndex = line.indexOf(":");
+          if (separatorIndex === -1) return null;
+          return {
+            label: line.slice(0, separatorIndex).trim(),
+            value: formatLostDetailValue(
+              line.slice(0, separatorIndex).trim(),
+              line.slice(separatorIndex + 1).trim()
+            ),
+          };
+        })
+        .filter(Boolean);
+
+      return {
+        details,
+        body: bodyBlock.trim(),
+      };
+    };
+
+    const openImageViewer = (src, alt = "") => {
+      imageViewer.src = src;
+      imageViewer.alt = alt;
+      imageViewer.show = true;
+    };
+
+    const closeImageViewer = () => {
+      imageViewer.show = false;
+      imageViewer.src = "";
+      imageViewer.alt = "";
+    };
+
+    const formatLostDetailValue = (label, value) => {
+      if (label !== "분실 추정 일시" || !value) return value;
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      if (!match) return value;
+      const [, year, month, day, hour, minute] = match;
+      return `${year}년 ${month}월 ${day}일 ${hour}:${minute}`;
+    };
 
     const handleFileChange = (event) => {
       const file = event.target.files[0];
@@ -338,7 +489,13 @@ export default {
       answerContent,
       currentAnswer,
       isEditMode,
+      imageViewer,
+      answerTemplates,
       closeModal,
+      applyAnswerTemplate,
+      getLostContentParts,
+      openImageViewer,
+      closeImageViewer,
       handleFileChange,
       submitAnswer,
       formatDate,

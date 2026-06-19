@@ -57,6 +57,107 @@
           </div>
         </div>
 
+        <div class="mb-6 rounded-lg border border-primary-100 bg-primary-50 p-4">
+          <h2 class="text-base font-semibold text-gray-900 mb-1">
+            분실 상황
+          </h2>
+          <p class="text-sm text-gray-600 mb-4">
+            아래 정보가 자세할수록 확인과 연락이 빨라집니다.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                노선번호
+              </label>
+              <input
+                v-model="form.routeNumber"
+                type="text"
+                class="form-input"
+                placeholder="예: 70, 370"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                분실 추정 일시
+              </label>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input
+                  v-model="form.lostDate"
+                  type="date"
+                  class="form-input"
+                  aria-label="분실 추정 날짜"
+                />
+                <input
+                  v-model="form.lostTime"
+                  type="time"
+                  class="form-input"
+                  aria-label="분실 추정 시간"
+                />
+              </div>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <button
+                  v-for="time in quickTimeOptions"
+                  :key="time.value"
+                  type="button"
+                  class="px-3 py-1.5 text-xs font-medium rounded border"
+                  :class="
+                    form.lostTime === time.value
+                      ? 'bg-primary-600 text-white border-primary-600'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                  "
+                  @click="selectLostTime(time.value)"
+                >
+                  {{ time.label }}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                탑승/하차 정류장
+              </label>
+              <input
+                v-model="form.stopInfo"
+                type="text"
+                class="form-input"
+                placeholder="예: 안성터미널 승차, 중앙대 하차"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                버스 안 위치
+              </label>
+              <input
+                v-model="form.busPosition"
+                type="text"
+                class="form-input"
+                placeholder="예: 뒷문 근처, 맨 뒷좌석"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                물건 종류
+              </label>
+              <input
+                v-model="form.itemType"
+                type="text"
+                class="form-input"
+                placeholder="예: 지갑, 휴대폰, 가방"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                색상/특징
+              </label>
+              <input
+                v-model="form.itemFeature"
+                type="text"
+                class="form-input"
+                placeholder="예: 검은색, 이름표 있음"
+              />
+            </div>
+          </div>
+        </div>
+
         <!-- Title -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -66,7 +167,7 @@
             v-model="form.title"
             type="text"
             class="form-input"
-            placeholder="문의 제목을 입력하세요"
+            placeholder="예: 70번 버스에서 검은색 지갑을 잃어버렸습니다"
             required
           />
         </div>
@@ -80,7 +181,7 @@
             v-model="form.content"
             rows="8"
             class="form-textarea"
-            placeholder="문의 내용을 자세히 작성해주세요"
+            placeholder="물건의 특징, 분실 당시 상황, 연락 가능한 시간 등을 적어주세요"
             required
           ></textarea>
           <p class="text-sm text-gray-500 mt-1">
@@ -91,16 +192,15 @@
         <!-- File Upload -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">
-            첨부파일
+            분실물 사진 끌어다 놓기
           </label>
-          <div class="mt-2">
-            <input
-              type="file"
-              @change="handleFileUpload"
-              class="form-input"
-              accept=".jpg,.jpeg,.png"
-            />
-          </div>
+          <FileDropZone
+            accept=".jpg,.jpeg,.png"
+            :max-size-mb="10"
+            title="분실물 사진을 끌어오세요"
+            description="JPG, PNG 파일만 업로드 가능 (최대 10MB)"
+            @selected="handleFileSelect"
+          />
           <p class="text-sm text-gray-500 mt-1">
             JPG, PNG 파일만 업로드 가능 (최대 10MB)
           </p>
@@ -259,10 +359,14 @@
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
+import FileDropZone from "@/components/FileDropZone.vue";
 import api from "@/services/api";
 
 export default {
   name: "LostForm",
+  components: {
+    FileDropZone,
+  },
   setup() {
     const router = useRouter();
     const qasStore = useQAsStore();
@@ -275,21 +379,45 @@ export default {
     const form = reactive({
       writer: "",
       email: "",
+      password: "",
       qa_type: "LOST",
       title: "",
       content: "",
+      routeNumber: "",
+      lostDate: "",
+      lostTime: "",
+      stopInfo: "",
+      busPosition: "",
+      itemType: "",
+      itemFeature: "",
       file: null,
       captcha: "",
       hidden: true, // 비밀글 여부
     });
 
+    const quickTimeOptions = [
+      { label: "출근 07:00", value: "07:00" },
+      { label: "오전 09:00", value: "09:00" },
+      { label: "점심 12:00", value: "12:00" },
+      { label: "오후 15:00", value: "15:00" },
+      { label: "퇴근 18:00", value: "18:00" },
+      { label: "저녁 20:00", value: "20:00" },
+    ];
+
+    const selectLostTime = (time) => {
+      form.lostTime = time;
+    };
+
     const handleFileUpload = (event) => {
-      const file = event.target.files[0];
+      handleFileSelect(Array.from(event.target.files || []));
+    };
+
+    const handleFileSelect = (files) => {
+      const file = files[0];
       if (file) {
         // 파일 크기 검증 (10MB)
         if (file.size > 10 * 1024 * 1024) {
           alert("파일 크기는 10MB를 초과할 수 없습니다.");
-          event.target.value = "";
           return;
         }
 
@@ -297,7 +425,6 @@ export default {
         const allowedTypes = ["image/jpeg", "image/png"];
         if (!allowedTypes.includes(file.type)) {
           alert("지원하지 않는 파일 형식입니다.");
-          event.target.value = "";
           return;
         }
 
@@ -382,11 +509,26 @@ export default {
         );
 
         const formData = new FormData();
+        const lostDetails = [
+          ["노선번호", form.routeNumber],
+          ["분실 추정 일시", formatLostDateTime(form.lostDate, form.lostTime)],
+          ["탑승/하차 정류장", form.stopInfo],
+          ["버스 안 위치", form.busPosition],
+          ["물건 종류", form.itemType],
+          ["색상/특징", form.itemFeature],
+        ]
+          .filter(([, value]) => value && String(value).trim())
+          .map(([label, value]) => `${label}: ${value}`)
+          .join("\n");
+        const content = lostDetails
+          ? `[분실 상황]\n${lostDetails}\n\n[상세 내용]\n${form.content}`
+          : form.content;
+
         formData.append("writer", form.writer);
         formData.append("email", form.email);
         formData.append("password", form.password || "");
         formData.append("title", form.title);
-        formData.append("content", form.content);
+        formData.append("content", content);
         formData.append("hidden", form.hidden);
         formData.append("qa_type", form.qa_type);
 
@@ -413,6 +555,14 @@ export default {
       }
     };
 
+    const formatLostDateTime = (date, time) => {
+      if (!date && !time) return "";
+      if (!date) return time || "";
+      if (!time) return date;
+      const [year, month, day] = date.split("-");
+      return `${year}년 ${month}월 ${day}일 ${time}`;
+    };
+
     onMounted(() => {
       loadCaptcha();
     });
@@ -423,10 +573,14 @@ export default {
       showPrivacyModal,
       captchaImage,
       handleFileUpload,
+      handleFileSelect,
       removeFile,
       formatFileSize,
+      quickTimeOptions,
+      selectLostTime,
       refreshCaptcha,
       submitForm,
+      formatLostDateTime,
     };
   },
 };

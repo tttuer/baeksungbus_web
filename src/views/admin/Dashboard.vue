@@ -6,6 +6,34 @@
       <p class="text-gray-600">백성운수 관리자 대시보드</p>
     </div>
 
+    <!-- Priority Work Queue -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900">오늘 먼저 처리할 일</h2>
+          <p class="text-sm text-gray-600 mt-1">
+            고객 응대가 필요한 미처리 항목을 빠르게 확인하세요.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:min-w-[440px]">
+          <router-link
+            to="/adm/customer"
+            class="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-3 hover:bg-red-100 transition-colors"
+          >
+            <span class="font-medium text-red-900">미답변 고객 문의</span>
+            <span class="text-2xl font-bold text-red-700">{{ stats.unansweredQAs || 0 }}</span>
+          </router-link>
+          <router-link
+            to="/adm/lost"
+            class="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 hover:bg-amber-100 transition-colors"
+          >
+            <span class="font-medium text-amber-900">처리 중 분실물</span>
+            <span class="text-2xl font-bold text-amber-700">{{ stats.unansweredLosts || 0 }}</span>
+          </router-link>
+        </div>
+      </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white rounded-lg shadow p-6">
