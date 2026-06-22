@@ -216,7 +216,8 @@
             <tr
               v-for="notice in notices"
               :key="notice.id"
-              class="hover:bg-gray-50"
+              class="hover:bg-gray-50 cursor-pointer"
+              @click="openDetailModal(notice)"
             >
               <td class="px-6 py-4">
                 <div class="flex items-center">
@@ -259,13 +260,13 @@
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
                   <button
-                    @click="editNotice(notice)"
+                    @click.stop="editNotice(notice)"
                     class="text-indigo-600 hover:text-indigo-800"
                   >
                     수정
                   </button>
                   <button
-                    @click="deleteNotice(notice.id)"
+                    @click.stop="deleteNotice(notice.id)"
                     class="text-red-600 hover:text-red-800"
                   >
                     삭제
@@ -361,6 +362,138 @@
             </div>
           </div>
         </nav>
+      </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div
+      v-if="showDetailModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      @click.self="closeDetailModal"
+    >
+      <div
+        class="bg-white rounded-lg max-w-3xl w-full max-h-screen overflow-y-auto"
+        @click.stop
+      >
+        <div class="p-6 border-b border-gray-200">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">공지사항 상세</h3>
+            <button
+              type="button"
+              @click="closeDetailModal"
+              class="text-gray-400 hover:text-gray-600"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div v-if="selectedNotice" class="p-6 space-y-5">
+          <div>
+            <p class="text-sm font-medium text-gray-500">제목</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900">
+              {{ selectedNotice.title }}
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <p class="text-sm font-medium text-gray-500">작성자</p>
+              <p class="mt-1 text-sm text-gray-900">백성운수(주)</p>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-500">등록일</p>
+              <p class="mt-1 text-sm text-gray-900">
+                {{ formatDate(selectedNotice.c_date) }}
+              </p>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-500">조회수</p>
+              <p class="mt-1 text-sm text-gray-900">
+                {{ selectedNotice.read_cnt || 0 }}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-sm font-medium text-gray-500">내용</p>
+            <div class="mt-2 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <p class="text-sm leading-6 text-gray-900 whitespace-pre-wrap">
+                {{ selectedNotice.content }}
+              </p>
+            </div>
+          </div>
+
+          <div v-if="selectedNotice.attachment">
+            <p class="text-sm font-medium text-gray-500 mb-2">첨부파일</p>
+            <img
+              :src="getNoticeAttachmentUrl(selectedNotice.attachment)"
+              :alt="selectedNotice.attachment_filename || '공지사항 첨부 이미지'"
+              class="max-h-96 max-w-full cursor-zoom-in rounded-lg border border-gray-200 object-contain hover:opacity-90"
+              @click.stop="
+                openImageViewer(
+                  getNoticeAttachmentUrl(selectedNotice.attachment),
+                  selectedNotice.attachment_filename || '공지사항 첨부 이미지'
+                )
+              "
+            />
+            <p
+              v-if="selectedNotice.attachment_filename"
+              class="mt-2 text-xs text-gray-500"
+            >
+              {{ selectedNotice.attachment_filename }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div
+      v-if="imageViewer.show"
+      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[70] p-4"
+      @click.self="closeImageViewer"
+    >
+      <button
+        type="button"
+        class="absolute top-4 right-4 text-white hover:text-gray-300"
+        @click="closeImageViewer"
+      >
+        <svg
+          class="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+      <div
+        class="max-w-[95vw] max-h-[90vh] overflow-auto rounded bg-white p-2"
+        @click.stop
+      >
+        <img
+          :src="imageViewer.src"
+          :alt="imageViewer.alt"
+          class="max-w-none"
+        />
       </div>
     </div>
 
@@ -579,8 +712,15 @@ export default {
     const importanceFilter = ref("");
     const currentPage = ref(1);
     const showModal = ref(false);
+    const showDetailModal = ref(false);
     const editingNotice = ref(null);
+    const selectedNotice = ref(null);
     const isSubmitting = ref(false);
+    const imageViewer = reactive({
+      show: false,
+      src: "",
+      alt: "",
+    });
 
     const isLoading = computed(() => noticesStore.isLoading);
     const notices = computed(() => noticesStore.notices);
@@ -751,6 +891,40 @@ export default {
       showModal.value = true;
     };
 
+    const openDetailModal = async (notice) => {
+      try {
+        selectedNotice.value = await noticesStore.fetchNoticeById(notice.id);
+        showDetailModal.value = true;
+      } catch (error) {
+        console.error("공지사항 상세 로드 실패:", error);
+        alert("공지사항을 불러오는데 실패했습니다.");
+      }
+    };
+
+    const closeDetailModal = () => {
+      showDetailModal.value = false;
+      selectedNotice.value = null;
+    };
+
+    const getNoticeAttachmentUrl = (attachment) => {
+      if (!attachment || typeof attachment !== "string") return "";
+      if (attachment.startsWith("data:image/")) return attachment;
+      if (attachment.startsWith("http")) return attachment;
+      return `data:image/jpeg;base64,${attachment}`;
+    };
+
+    const openImageViewer = (src, alt = "") => {
+      imageViewer.src = src;
+      imageViewer.alt = alt;
+      imageViewer.show = true;
+    };
+
+    const closeImageViewer = () => {
+      imageViewer.show = false;
+      imageViewer.src = "";
+      imageViewer.alt = "";
+    };
+
     const editNotice = async (notice) => {
       try {
         editingNotice.value = notice;
@@ -853,8 +1027,11 @@ export default {
       unpublishedCount,
       importantCount,
       showModal,
+      showDetailModal,
       editingNotice,
+      selectedNotice,
       isSubmitting,
+      imageViewer,
       noticeForm,
       formatDate,
       search,
@@ -863,6 +1040,11 @@ export default {
       goToPage,
       getPageNumbers,
       openCreateModal,
+      openDetailModal,
+      closeDetailModal,
+      getNoticeAttachmentUrl,
+      openImageViewer,
+      closeImageViewer,
       editNotice,
       closeModal,
       submitNotice,
