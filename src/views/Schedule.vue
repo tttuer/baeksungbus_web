@@ -344,7 +344,8 @@ export default {
 
     const applyFilters = async () => {
       const params = {};
-      if (searchQuery.value) params.filter = searchQuery.value;
+      const filter = searchQuery.value.trim();
+      if (filter) params.filter = filter;
 
       await schedulesStore.fetchSchedules(params);
     };
@@ -458,7 +459,7 @@ export default {
     };
 
     onMounted(() => {
-      const routeNumber = route.query.route;
+      const routeNumber = route.query.route || route.query.filter;
       if (routeNumber) {
         searchQuery.value = String(routeNumber);
         applyFilters();
