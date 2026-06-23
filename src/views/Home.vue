@@ -11,7 +11,7 @@
             백성운수
           </h1>
           <p class="text-gray-600 mb-5">
-            노선번호를 검색해 시간표를 확인하고, 운행 변경 공지와 분실물 문의를 빠르게 이용하세요.
+            노선번호를 검색해 시간표를 확인하고, 운행 변경 공지와 고객 문의를 빠르게 이용하세요.
           </p>
           <form class="flex flex-col sm:flex-row gap-3" @submit.prevent="goToScheduleSearch">
             <label class="sr-only" for="home-route-search">노선번호 검색</label>
@@ -33,10 +33,10 @@
             <p class="text-sm text-gray-500">바로가기</p>
             <p class="font-semibold text-gray-900 mt-1">노선/시간표</p>
           </router-link>
-          <a href="tel:031-673-3456" class="rounded-lg border border-gray-200 p-4 hover:border-primary-300 hover:bg-primary-50 transition-colors">
-            <p class="text-sm text-gray-500">전화문의</p>
-            <p class="font-semibold text-gray-900 mt-1">031-673-3456</p>
-          </a>
+          <router-link to="/qa/form" class="rounded-lg border border-gray-200 p-4 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+            <p class="text-sm text-gray-500">궁금한 점은</p>
+            <p class="font-semibold text-gray-900 mt-1">고객문의 작성</p>
+          </router-link>
           <router-link to="/lost/form" class="rounded-lg border border-gray-200 p-4 hover:border-primary-300 hover:bg-primary-50 transition-colors">
             <p class="text-sm text-gray-500">잃어버렸다면</p>
             <p class="font-semibold text-gray-900 mt-1">분실물 신고</p>
@@ -102,7 +102,7 @@
       </router-link>
 
       <router-link
-        to="/qa"
+        to="/qa/form"
         class="card p-5 hover:shadow-lg transition-shadow text-center group"
       >
         <div
@@ -123,11 +123,11 @@
           </svg>
         </div>
         <h3 class="text-lg font-semibold mb-2">고객 문의</h3>
-        <p class="text-gray-600">궁금한 점을 문의하세요</p>
+        <p class="text-gray-600">궁금한 점이나 건의사항을 남기세요</p>
       </router-link>
 
       <router-link
-        to="/lost"
+        to="/lost/form"
         class="card p-5 hover:shadow-lg transition-shadow text-center group"
       >
         <div
@@ -147,8 +147,8 @@
             />
           </svg>
         </div>
-        <h3 class="text-lg font-semibold mb-2">분실물 문의</h3>
-        <p class="text-gray-600">분실물을 문의하세요</p>
+        <h3 class="text-lg font-semibold mb-2">분실물 신고</h3>
+        <p class="text-gray-600">잃어버린 물건 정보를 남기세요</p>
       </router-link>
     </section>
 
