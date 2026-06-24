@@ -118,7 +118,7 @@
             active-class="bg-primary-700"
             @click="closeMobileMenu"
           >
-            시간표
+            운행 노선
           </router-link>
           <router-link 
             to="/ddock" 
@@ -126,7 +126,7 @@
             active-class="bg-primary-700"
             @click="closeMobileMenu"
           >
-            정류장
+            똑버스
           </router-link>
           <router-link 
             to="/location" 
@@ -134,7 +134,7 @@
             active-class="bg-primary-700"
             @click="closeMobileMenu"
           >
-            위치
+            오시는 길
           </router-link>
           <router-link 
             to="/notice" 
@@ -150,7 +150,7 @@
             active-class="bg-primary-700"
             @click="closeMobileMenu"
           >
-            Q&A
+            고객 문의
           </router-link>
           <router-link 
             to="/lost" 
