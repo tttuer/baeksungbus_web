@@ -26,6 +26,7 @@
             :style="{ animationDelay: `${(index % 20) * 0.1}s` }"
             @load="onImageLoad"
             @error="onImageError"
+            @click="openImageViewer(ddock)"
           />
           
           <!-- Placeholder for missing images -->
@@ -75,6 +76,40 @@
       </svg>
     </button>
 
+    <div
+      v-if="imageViewer.show"
+      ref="imageViewerPanel"
+      class="image-viewer"
+      @click="closeImageViewer"
+    >
+      <button
+        type="button"
+        class="image-viewer-close"
+        aria-label="닫기"
+        @click.stop="closeImageViewer"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="image-viewer-mode"
+        @click.stop="toggleImageViewerSize()"
+      >
+        {{ imageViewer.fitToScreen ? '원본 크기' : '화면 맞춤' }}
+      </button>
+      <div class="image-viewer-content">
+        <img
+          :src="imageViewer.src"
+          :alt="imageViewer.alt"
+          class="image-viewer-image"
+          :class="{ 'is-fit': imageViewer.fitToScreen }"
+          @click.stop="toggleImageViewerSize"
+        />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -92,10 +127,17 @@ export default {
     const isInitialLoading = ref(true)
     const isLoadingMore = ref(false)
     const loadMoreTrigger = ref(null)
+    const imageViewerPanel = ref(null)
     const observer = ref(null)
     
     // Scroll to top state
     const showScrollToTop = ref(false)
+    const imageViewer = ref({
+      show: false,
+      src: '',
+      alt: '',
+      fitToScreen: true
+    })
 
 
     // Computed
@@ -181,6 +223,93 @@ export default {
       // 이미지 로드 실패 시 placeholder 표시 등
     }
 
+    const openImageViewer = (ddock) => {
+      if (!ddock?.image) return
+
+      imageViewer.value = {
+        show: true,
+        src: `data:image/jpeg;base64,${ddock.image}`,
+        alt: ddock.image_name || `이미지 ${ddock.id || ''}`,
+        fitToScreen: true
+      }
+      document.addEventListener('keydown', handleImageViewerKeydown)
+    }
+
+    const closeImageViewer = () => {
+      imageViewer.value = {
+        show: false,
+        src: '',
+        alt: '',
+        fitToScreen: true
+      }
+      document.removeEventListener('keydown', handleImageViewerKeydown)
+    }
+
+    const clampRatio = (value) => Math.min(Math.max(value, 0), 1)
+
+    const getViewerFocusRatios = (event = null) => {
+      const panel = imageViewerPanel.value
+      const image = panel?.querySelector('.image-viewer-image')
+      if (!panel || !image) {
+        return { x: 0.5, y: 0.5 }
+      }
+
+      const imageRect = image.getBoundingClientRect()
+      if (!imageRect.width || !imageRect.height) {
+        return { x: 0.5, y: 0.5 }
+      }
+
+      if (event && imageViewer.value.fitToScreen) {
+        return {
+          x: clampRatio((event.clientX - imageRect.left) / imageRect.width),
+          y: clampRatio((event.clientY - imageRect.top) / imageRect.height)
+        }
+      }
+
+      const panelRect = panel.getBoundingClientRect()
+      const focusX = panelRect.left + panel.clientWidth / 2
+      const focusY = panelRect.top + panel.clientHeight / 2
+
+      return {
+        x: clampRatio((focusX - imageRect.left) / imageRect.width),
+        y: clampRatio((focusY - imageRect.top) / imageRect.height)
+      }
+    }
+
+    const scrollViewerToRatios = async ({ x, y }) => {
+      await nextTick()
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+
+      const panel = imageViewerPanel.value
+      const image = panel?.querySelector('.image-viewer-image')
+      if (!panel || !image) return
+
+      const panelRect = panel.getBoundingClientRect()
+      const imageRect = image.getBoundingClientRect()
+      const targetX = panel.scrollLeft + (imageRect.left - panelRect.left) + imageRect.width * x
+      const targetY = panel.scrollTop + (imageRect.top - panelRect.top) + imageRect.height * y
+
+      panel.scrollLeft = Math.max(0, targetX - panel.clientWidth / 2)
+      panel.scrollTop = Math.max(0, targetY - panel.clientHeight / 2)
+    }
+
+    const toggleImageViewerSize = async (event = null) => {
+      const focusRatios = getViewerFocusRatios(event)
+
+      imageViewer.value.fitToScreen = !imageViewer.value.fitToScreen
+
+      await scrollViewerToRatios(focusRatios)
+    }
+
+    const handleImageViewerKeydown = (event) => {
+      if (event.key === 'Escape') {
+        closeImageViewer()
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        toggleImageViewerSize()
+      }
+    }
+
     // Lifecycle
     onMounted(async () => {
       await loadInitialImages()
@@ -199,6 +328,7 @@ export default {
       }
       // 스크롤 이벤트 리스너 제거
       window.removeEventListener('scroll', handleScroll)
+      document.removeEventListener('keydown', handleImageViewerKeydown)
     })
 
     return {
@@ -208,14 +338,19 @@ export default {
       isLoadingMore,
       hasMoreItems,
       loadMoreTrigger,
+      imageViewerPanel,
       
       // Scroll to top
       showScrollToTop,
+      imageViewer,
       scrollToTop,
-      
+       
       // Methods
       onImageLoad,
-      onImageError
+      onImageError,
+      openImageViewer,
+      closeImageViewer,
+      toggleImageViewerSize
     }
   }
 }
@@ -243,6 +378,7 @@ export default {
   max-width: 800px;
   height: auto;
   display: block;
+  cursor: zoom-in;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeInUp 0.6s ease-out;
 }
@@ -265,6 +401,85 @@ export default {
   margin: 1rem 0;
 }
 
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.88);
+  padding: 4.75rem 1rem 1rem;
+}
+
+.image-viewer-content {
+  width: fit-content;
+  min-width: 100%;
+  min-height: calc(100vh - 5.75rem);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.image-viewer-image {
+  width: auto;
+  height: auto;
+  max-width: none;
+  display: block;
+  background: white;
+  cursor: zoom-out;
+}
+
+.image-viewer-image.is-fit {
+  width: auto;
+  max-width: min(100%, 1200px);
+  max-height: none;
+  object-fit: initial;
+  cursor: zoom-in;
+}
+
+.image-viewer-close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 61;
+  display: flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111827;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.image-viewer-close:hover {
+  background: white;
+  transform: translateY(-1px);
+}
+
+.image-viewer-mode {
+  position: fixed;
+  top: 1rem;
+  right: 4.25rem;
+  z-index: 61;
+  min-width: 5.25rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111827;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.image-viewer-mode:hover {
+  background: white;
+  transform: translateY(-1px);
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -285,6 +500,15 @@ export default {
   
   .ddock-gallery {
     padding: 0.5rem;
+  }
+
+  .image-viewer {
+    padding: 4.75rem 0.5rem 0.5rem;
+  }
+
+  .image-viewer-mode {
+    right: 4rem;
+    padding: 0.75rem 0.875rem;
   }
 }
 
