@@ -16,7 +16,13 @@ export const useNoticesStore = defineStore("notices", () => {
   const fetchNotices = async (params = {}) => {
     try {
       isLoading.value = true;
-      const response = await api.get("/api/notices", { params });
+      const requestParams = {
+        ...params,
+        page_size: params.page_size || params.limit,
+      };
+      delete requestParams.limit;
+
+      const response = await api.get("/api/notices", { params: requestParams });
       notices.value =
         response.data.items || response.data.notices || response.data || [];
 
