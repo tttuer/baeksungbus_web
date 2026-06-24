@@ -7,16 +7,45 @@ export const useSchedulesStore = defineStore('schedules', () => {
   const currentSchedule = ref(null)
   const isLoading = ref(false)
   const totalCount = ref(0)
+  const pagination = ref({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1
+  })
 
   const fetchSchedules = async (params = {}) => {
     try {
       isLoading.value = true
       const response = await api.get('/api/schedules', { params })
-      schedules.value = response.data.items || response.data.schedules || response.data || []
-      totalCount.value = response.data.total_count || 0
+      const data = response.data || {}
+      const list = data.items || data.schedules || (Array.isArray(data) ? data : [])
+      const page = data.pagination?.page || data.page || params.page || 1
+      const limit = data.pagination?.limit || params.page_size || params.limit || 20
+      const total = data.pagination?.total || data.total_count || list.length || 0
+      const totalPages =
+        data.pagination?.totalPages ||
+        data.total_pages ||
+        Math.max(Math.ceil(total / limit), 1)
+
+      schedules.value = list
+      totalCount.value = total
+      pagination.value = {
+        page,
+        limit,
+        total,
+        totalPages
+      }
     } catch (error) {
       console.error('스케줄 목록 조회 실패:', error)
       schedules.value = []
+      totalCount.value = 0
+      pagination.value = {
+        page: params.page || 1,
+        limit: params.page_size || params.limit || 20,
+        total: 0,
+        totalPages: 1
+      }
     } finally {
       isLoading.value = false
     }
@@ -84,6 +113,7 @@ export const useSchedulesStore = defineStore('schedules', () => {
     currentSchedule,
     isLoading,
     totalCount,
+    pagination,
     fetchSchedules,
     fetchScheduleById,
     createSchedule,

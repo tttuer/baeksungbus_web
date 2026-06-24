@@ -79,96 +79,140 @@
 
     <!-- Schedule List -->
     <div v-else>
-      <div
-        v-if="schedules.length > 0"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-      >
+      <template v-if="schedules.length > 0">
         <div
-          v-for="schedule in schedules"
-          :key="schedule.id"
-          class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
-          <!-- 카드 헤더 -->
-          <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white">
-            <h2 class="text-2xl font-bold text-center">
-              {{ schedule.route_number }}번
-            </h2>
-            <p v-if="schedule.route_name" class="text-center text-blue-100 text-sm mt-1">
-              {{ schedule.route_name }}
-            </p>
-          </div>
+          <div
+            v-for="schedule in schedules"
+            :key="schedule.id"
+            class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+          >
+            <!-- 카드 헤더 -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4 text-white">
+              <h2 class="text-2xl font-bold text-center">
+                {{ schedule.route_number }}번
+              </h2>
+              <p v-if="schedule.route_name" class="text-center text-blue-100 text-sm mt-1">
+                {{ schedule.route_name }}
+              </p>
+            </div>
 
-          <!-- 시간표 이미지 -->
-          <div class="p-4">
-            <div v-if="schedule.images && schedule.images.length > 0" class="mb-4 relative">
-              <div class="relative">
+            <!-- 시간표 이미지 -->
+            <div class="p-4">
+              <div v-if="schedule.images && schedule.images.length > 0" class="mb-4 relative">
+                <div class="relative">
+                  <img
+                    :src="`data:image/jpeg;base64,${schedule.images[0].data}`"
+                    :alt="schedule.images[0].filename || '노선 시간표'"
+                    class="w-full h-48 object-contain bg-gray-50 rounded-lg shadow-sm cursor-pointer"
+                    @click="openTimetableModal(schedule)"
+                  />
+                  <div v-if="schedule.images.length > 1" class="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
+                    {{ schedule.images.length }}장
+                  </div>
+                </div>
+              </div>
+              <div v-else-if="schedule.image_data" class="mb-4">
+                <!-- 하위 호환성을 위한 단일 이미지 지원 -->
                 <img
-                  :src="`data:image/jpeg;base64,${schedule.images[0].data}`"
-                  :alt="schedule.images[0].filename || '노선 시간표'"
+                  :src="`data:image/jpeg;base64,${schedule.image_data}`"
+                  :alt="schedule.image_filename || '노선 시간표'"
                   class="w-full h-48 object-contain bg-gray-50 rounded-lg shadow-sm cursor-pointer"
                   @click="openTimetableModal(schedule)"
                 />
-                <div v-if="schedule.images.length > 1" class="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded-full">
-                  {{ schedule.images.length }}장
+              </div>
+              <div v-else class="mb-4 h-48 bg-gray-100 rounded-lg flex items-center justify-center">
+                <div class="text-center text-gray-500">
+                  <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p class="text-sm">시간표 이미지 없음</p>
                 </div>
               </div>
-            </div>
-            <div v-else-if="schedule.image_data" class="mb-4">
-              <!-- 하위 호환성을 위한 단일 이미지 지원 -->
-              <img
-                :src="`data:image/jpeg;base64,${schedule.image_data}`"
-                :alt="schedule.image_filename || '노선 시간표'"
-                class="w-full h-48 object-contain bg-gray-50 rounded-lg shadow-sm cursor-pointer"
-                @click="openTimetableModal(schedule)"
-              />
-            </div>
-            <div v-else class="mb-4 h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-              <div class="text-center text-gray-500">
-                <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p class="text-sm">시간표 이미지 없음</p>
-              </div>
-            </div>
 
-            <!-- 액션 버튼들 -->
-            <div class="space-y-3">
-              <button
-                v-if="(schedule.images && schedule.images.length > 0) || schedule.image_data"
-                @click="openTimetableModal(schedule)"
-                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                노선 시간표
-                <span v-if="schedule.images && schedule.images.length > 1" class="ml-1 text-xs bg-blue-500 px-1 rounded">
-                  {{ schedule.images.length }}장
-                </span>
-              </button>
-              <button
-                v-if="(schedule.images && schedule.images.length > 0) || schedule.image_data"
-                @click="downloadCurrentScheduleImage(schedule)"
-                class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center"
-              >
-                시간표 이미지 저장
-              </button>
-              
-              <button
-                v-if="schedule.url"
-                @click="openNaverMap(schedule.url)"
-                class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
-              >
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                네이버 지도에서 보기
-              </button>
+              <!-- 액션 버튼들 -->
+              <div class="space-y-3">
+                <button
+                  v-if="(schedule.images && schedule.images.length > 0) || schedule.image_data"
+                  @click="openTimetableModal(schedule)"
+                  class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center"
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  노선 시간표
+                  <span v-if="schedule.images && schedule.images.length > 1" class="ml-1 text-xs bg-blue-500 px-1 rounded">
+                    {{ schedule.images.length }}장
+                  </span>
+                </button>
+                <button
+                  v-if="(schedule.images && schedule.images.length > 0) || schedule.image_data"
+                  @click="downloadCurrentScheduleImage(schedule)"
+                  class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center"
+                >
+                  시간표 이미지 저장
+                </button>
+                 
+                <button
+                  v-if="schedule.url"
+                  @click="openNaverMap(schedule.url)"
+                  class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center justify-center"
+                >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  네이버 지도에서 보기
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+
+        <div
+          v-if="pagination.totalPages > 1"
+          class="mt-8 bg-white rounded-lg shadow-sm px-4 py-4 md:px-6"
+        >
+          <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <p class="text-sm text-gray-700">
+              총 <span class="font-medium">{{ pagination.total }}</span>개 중
+              <span class="font-medium">{{ pageStart }}</span>-<span class="font-medium">{{ pageEnd }}</span>개 표시
+            </p>
+            <nav class="flex flex-wrap items-center gap-1" aria-label="노선 페이지">
+              <button
+                @click="goToPage(pagination.page - 1)"
+                :disabled="pagination.page <= 1"
+                class="pagination-item"
+                :class="{ 'opacity-50 cursor-not-allowed': pagination.page <= 1 }"
+              >
+                이전
+              </button>
+              <template v-for="(page, index) in getPageNumbers()" :key="`${page}-${index}`">
+                <button
+                  v-if="page !== '...'"
+                  @click="goToPage(page)"
+                  class="pagination-item"
+                  :class="{ active: page === pagination.page }"
+                >
+                  {{ page }}
+                </button>
+                <span v-else class="pagination-item cursor-default">
+                  ...
+                </span>
+              </template>
+              <button
+                @click="goToPage(pagination.page + 1)"
+                :disabled="pagination.page >= pagination.totalPages"
+                class="pagination-item"
+                :class="{ 'opacity-50 cursor-not-allowed': pagination.page >= pagination.totalPages }"
+              >
+                다음
+              </button>
+            </nav>
+          </div>
+        </div>
+      </template>
 
       <div v-else class="card p-12 text-center">
         <svg
@@ -329,6 +373,8 @@ export default {
     const showTimetableModal = ref(false);
     const selectedSchedule = ref(null);
     const currentImageIndex = ref(0);
+    const currentPage = ref(1);
+    const pageSize = 12;
 
     const schedulesStore = useSchedulesStore();
     const route = useRoute();
@@ -341,18 +387,74 @@ export default {
 
     const isLoading = computed(() => schedulesStore.isLoading);
     const schedules = computed(() => schedulesStore.schedules);
+    const pagination = computed(() => schedulesStore.pagination);
+    const pageStart = computed(() => {
+      if (!pagination.value.total) return 0;
+      return (pagination.value.page - 1) * pagination.value.limit + 1;
+    });
+    const pageEnd = computed(() =>
+      Math.min(pagination.value.page * pagination.value.limit, pagination.value.total)
+    );
 
-    const applyFilters = async () => {
-      const params = {};
+    const fetchSchedules = async (page = currentPage.value) => {
+      currentPage.value = page;
+      const params = {
+        page,
+        page_size: pageSize,
+      };
       const filter = searchQuery.value.trim();
       if (filter) params.filter = filter;
 
       await schedulesStore.fetchSchedules(params);
     };
 
+    const applyFilters = async () => {
+      await fetchSchedules(1);
+    };
+
     const resetFilters = async () => {
       searchQuery.value = "";
-      await schedulesStore.fetchSchedules();
+      await fetchSchedules(1);
+    };
+
+    const goToPage = async (page) => {
+      if (page < 1 || page > pagination.value.totalPages) return;
+      await fetchSchedules(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const getPageNumbers = () => {
+      const totalPages = pagination.value.totalPages;
+      const current = pagination.value.page;
+      const pages = [];
+
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else if (current <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (current >= totalPages - 3) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = current - 1; i <= current + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+
+      return pages;
     };
 
     const openTimetableModal = (schedule) => {
@@ -464,7 +566,7 @@ export default {
         searchQuery.value = String(routeNumber);
         applyFilters();
       } else {
-        schedulesStore.fetchSchedules();
+        fetchSchedules(1);
       }
     });
 
@@ -472,12 +574,17 @@ export default {
       filters,
       isLoading,
       schedules,
+      pagination,
+      pageStart,
+      pageEnd,
       searchQuery,
       showTimetableModal,
       selectedSchedule,
       currentImageIndex,
       applyFilters,
       resetFilters,
+      goToPage,
+      getPageNumbers,
       openTimetableModal,
       closeTimetableModal,
       handleKeydown,

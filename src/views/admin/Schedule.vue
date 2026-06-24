@@ -550,26 +550,6 @@
           <div v-else>
             <div class="flex items-center justify-between mb-4">
               <h4 class="text-md font-medium text-gray-900">노선 정보</h4>
-              <button
-                type="button"
-                @click="addRoute"
-                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <svg
-                  class="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                노선 추가
-              </button>
             </div>
 
             <div class="space-y-6">
@@ -672,6 +652,31 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div class="sticky bottom-4 z-20 flex justify-end pointer-events-none">
+              <button
+                type="button"
+                @click="addRoute"
+                class="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-blue-500/30 transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                aria-label="노선 추가"
+                title="노선 추가"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                노선 추가
+              </button>
             </div>
           </div>
 
