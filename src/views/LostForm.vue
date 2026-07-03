@@ -265,56 +265,16 @@
           </div>
         </div>
 
-        <!-- CAPTCHA (Optional) -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">
-            보안문자 <span class="text-red-500">*</span>
-          </label>
-          <div class="flex items-center gap-4">
-            <div class="flex-1">
-              <input
-                v-model="form.captcha"
-                type="text"
-                class="form-input"
-                placeholder="보안문자를 입력하세요"
-                required
-              />
-            </div>
-            <div class="bg-gray-100 p-3 rounded border">
-              <img
-                v-if="captchaImage"
-                :src="captchaImage"
-                alt="보안문자"
-                class="h-12"
-              />
-              <div
-                v-else
-                class="h-12 flex items-center justify-center text-gray-500"
-              >
-                로딩 중...
-              </div>
-            </div>
-            <button
-              type="button"
-              @click="refreshCaptcha"
-              class="btn btn-outline btn-sm"
-            >
-              <svg
-                class="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              새로고침
-            </button>
-          </div>
+        <div class="absolute -left-[10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+          <label for="website">홈페이지</label>
+          <input
+            id="website"
+            v-model="form.website"
+            type="text"
+            name="website"
+            tabindex="-1"
+            autocomplete="off"
+          />
         </div>
 
         <!-- Submit Buttons -->
@@ -356,11 +316,10 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
 import FileDropZone from "@/components/FileDropZone.vue";
-import api from "@/services/api";
 
 export default {
   name: "LostForm",
@@ -373,8 +332,6 @@ export default {
 
     const isSubmitting = ref(false);
     const showPrivacyModal = ref(false);
-    const captchaImage = ref(null);
-    const captchaId = ref(null);
 
     const form = reactive({
       writer: "",
@@ -391,7 +348,7 @@ export default {
       itemType: "",
       itemFeature: "",
       file: null,
-      captcha: "",
+      website: "",
       hidden: true, // 비밀글 여부
     });
 
@@ -449,21 +406,6 @@ export default {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    const loadCaptcha = async () => {
-      try {
-        const response = await api.get("/api/captcha_image");
-        captchaId.value = response.data.captcha_id;
-        captchaImage.value = response.data.image; // base64 URI
-      } catch (error) {
-        console.error("캡차 로드 실패:", error);
-      }
-    };
-
-    const refreshCaptcha = () => {
-      form.captcha = "";
-      loadCaptcha();
-    };
-
     const submitForm = async () => {
       // 폼 유효성 검사
       if (!form.writer.trim()) {
@@ -491,22 +433,8 @@ export default {
         return;
       }
 
-      if (!form.captcha.trim()) {
-        alert("보안문자를 입력해주세요.");
-        return;
-      }
-
       try {
         isSubmitting.value = true;
-
-        // 1. 먼저 CAPTCHA 검증
-        await api.post(
-          "/api/submit",
-          new URLSearchParams({
-            captcha_id: captchaId.value, // ← 이걸 함께 보내야 서버가 유효성 검사 가능
-            captcha: form.captcha,
-          })
-        );
 
         const formData = new FormData();
         const lostDetails = [
@@ -531,6 +459,7 @@ export default {
         formData.append("content", content);
         formData.append("hidden", form.hidden);
         formData.append("qa_type", form.qa_type);
+        formData.append("website", form.website);
 
         if (form.file) {
           formData.append("attachment", form.file);
@@ -544,8 +473,9 @@ export default {
         router.push("/lost");
       } catch (error) {
         if (error.response?.data?.detail === "Invalid CAPTCHA") {
-          alert("보안문자가 올바르지 않습니다. 다시 입력해주세요.");
-          refreshCaptcha();
+          alert("문의 등록 검증에 실패했습니다. 다시 시도해주세요.");
+        } else if (error.response?.status === 429) {
+          alert("짧은 시간에 문의가 여러 번 제출되었습니다. 잠시 후 다시 시도해주세요.");
         } else {
           console.error("문의 등록 실패:", error);
           alert("문의 등록에 실패했습니다. 다시 시도해주세요.");
@@ -563,22 +493,16 @@ export default {
       return `${year}년 ${month}월 ${day}일 ${time}`;
     };
 
-    onMounted(() => {
-      loadCaptcha();
-    });
-
     return {
       form,
       isSubmitting,
       showPrivacyModal,
-      captchaImage,
       handleFileUpload,
       handleFileSelect,
       removeFile,
       formatFileSize,
       quickTimeOptions,
       selectLostTime,
-      refreshCaptcha,
       submitForm,
       formatLostDateTime,
     };
