@@ -2,7 +2,8 @@
   <div
     v-if="show"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-    @click.self="closeModal"
+    @mousedown="isBackdropPress = $event.target === $event.currentTarget"
+    @click.self="closeOnBackdrop"
   >
     <div
       class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto"
@@ -147,6 +148,24 @@
           <div class="text-sm text-gray-700">
             <p class="whitespace-pre-wrap">{{ currentAnswer.content }}</p>
           </div>
+          <div v-if="form.file || currentAnswer.attachment_filename" class="mt-3 rounded-lg bg-white p-3">
+            <img
+              v-if="isImageFile(form.file?.name || currentAnswer.attachment_filename)"
+              :src="form.file ? previewUrl : getAttachmentUrl(currentAnswer.attachment, currentAnswer.attachment_filename)"
+              :alt="form.file?.name || currentAnswer.attachment_filename"
+              class="max-h-52 max-w-full cursor-zoom-in rounded-lg object-contain"
+              @click="openImageViewer(form.file ? previewUrl : getAttachmentUrl(currentAnswer.attachment, currentAnswer.attachment_filename), form.file?.name || currentAnswer.attachment_filename)"
+            />
+            <button
+              v-if="!form.file"
+              type="button"
+              class="mt-2 text-sm text-primary-600 hover:underline"
+              @click="downloadAttachment(currentAnswer.attachment, currentAnswer.attachment_filename)"
+            >
+              첨부파일: {{ currentAnswer.attachment_filename }}
+            </button>
+            <p v-else class="mt-2 text-sm text-gray-700">새 첨부파일: {{ form.file.name }}</p>
+          </div>
         </div>
 
         <!-- Answer Form -->
@@ -180,6 +199,28 @@
               "
               required
             ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">첨부파일</label>
+            <FileDropZone
+              accept="image/*,.pdf,.doc,.docx,.hwp"
+              :max-size-mb="10"
+              title="답변 파일을 끌어오세요"
+              description="이미지, PDF, DOC, HWP 파일 (최대 10MB)"
+              @selected="handleFileSelect"
+            />
+            <div
+              v-if="currentAnswer?.attachment_filename && !form.file && !form.removeAttachment"
+              class="mt-3 flex items-center justify-between rounded-lg bg-gray-50 p-3 text-sm"
+            >
+              <span>{{ currentAnswer.attachment_filename }}</span>
+              <button type="button" class="text-red-600" @click="form.removeAttachment = true">삭제</button>
+            </div>
+            <div v-if="form.file" class="mt-3 flex items-center justify-between rounded-lg bg-gray-50 p-3 text-sm">
+              <span>{{ form.file.name }}</span>
+              <button type="button" class="text-red-600" @click="form.file = null">삭제</button>
+            </div>
           </div>
 
           <!-- Form Actions -->
@@ -231,42 +272,22 @@
       </div>
     </div>
 
-    <div
-      v-if="imageViewer.show"
-      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[70] p-4"
-      @click.self="closeImageViewer"
-    >
-      <button
-        type="button"
-        class="absolute top-4 right-4 text-white hover:text-gray-300"
-        @click="closeImageViewer"
-      >
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-      <div class="max-w-6xl max-h-[90vh]" @click.stop>
-        <img
-          :src="imageViewer.src"
-          :alt="imageViewer.alt"
-          class="max-w-full max-h-[85vh] object-contain"
-        />
-        <p v-if="imageViewer.alt" class="text-white text-center mt-3 text-sm">
-          {{ imageViewer.alt }}
-        </p>
-      </div>
-    </div>
+    <ImageViewer v-bind="imageViewer" @close="closeImageViewer" />
   </div>
 </template>
 
 <script>
-import { ref, reactive, watch } from "vue";
+import { onUnmounted, ref, reactive, watch } from "vue";
 import api from "@/services/api";
 import { useQAsStore } from "@/stores/qas";
 import { formatDate } from "@/utils/format";
+import FileDropZone from "@/components/FileDropZone.vue";
+import ImageViewer from "@/components/ImageViewer.vue";
+import { downloadAttachment, getAttachmentUrl, isImageFile } from "@/utils/attachment";
 
 export default {
   name: "AnswerModal",
+  components: { FileDropZone, ImageViewer },
   props: {
     show: {
       type: Boolean,
@@ -283,15 +304,17 @@ export default {
     const isSubmitting = ref(false);
     const qa = ref(null);
     const isLoading = ref(false);
+    const isBackdropPress = ref(false);
 
     const form = reactive({
-      content: "",
       file: null,
+      removeAttachment: false,
     });
 
     const answerContent = ref("");
     const currentAnswer = ref(null);
     const isEditMode = ref(false);
+    const previewUrl = ref("");
     const imageViewer = reactive({
       show: false,
       src: "",
@@ -316,8 +339,8 @@ export default {
     ];
 
     const resetForm = () => {
-      form.content = "";
       form.file = null;
+      form.removeAttachment = false;
       answerContent.value = "";
       currentAnswer.value = null;
       isEditMode.value = false;
@@ -326,6 +349,11 @@ export default {
     const closeModal = () => {
       resetForm();
       emit("close");
+    };
+
+    const closeOnBackdrop = () => {
+      if (isBackdropPress.value) closeModal();
+      isBackdropPress.value = false;
     };
 
     const applyAnswerTemplate = (content) => {
@@ -376,6 +404,12 @@ export default {
       imageViewer.alt = "";
     };
 
+    watch(() => form.file, (file) => {
+      if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+      previewUrl.value = file ? URL.createObjectURL(file) : "";
+    });
+    onUnmounted(() => previewUrl.value && URL.revokeObjectURL(previewUrl.value));
+
     const formatLostDetailValue = (label, value) => {
       if (label !== "분실 추정 일시" || !value) return value;
       const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
@@ -384,15 +418,11 @@ export default {
       return `${year}년 ${month}월 ${day}일 ${hour}:${minute}`;
     };
 
-    const handleFileChange = (event) => {
-      const file = event.target.files[0];
+    const handleFileSelect = (files) => {
+      const file = files[0];
       if (file) {
-        if (file.size > 10 * 1024 * 1024) {
-          alert("파일 크기는 10MB를 초과할 수 없습니다.");
-          event.target.value = "";
-          return;
-        }
         form.file = file;
+        form.removeAttachment = false;
       }
     };
 
@@ -404,28 +434,16 @@ export default {
       try {
         isSubmitting.value = true;
 
-        const answerData = {
-          content: answerContent.value.trim(),
-          qa_id: qa.value.id,
-        };
-        if (isEditMode.value) {
-          answerData.id = currentAnswer.value.id; // 답변 수정 시 ID 포함
+        const answerData = new FormData();
+        answerData.append("content", answerContent.value.trim());
+        answerData.append("qa_id", qa.value.id);
+        if (form.file) answerData.append("attachment", form.file);
+        if (isEditMode.value) answerData.append("keep_attachment", !form.removeAttachment);
 
-          await api.patch(
-            `/api/answers/${currentAnswer.value.id}`,
-            answerData,
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
+        if (isEditMode.value) {
+          await api.patch(`/api/answers/${currentAnswer.value.id}`, answerData);
         } else {
-          await api.post(`/api/answers`, answerData, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
+          await api.post(`/api/answers`, answerData);
         }
 
         alert(
@@ -455,6 +473,7 @@ export default {
           isEditMode.value = true;
           currentAnswer.value = qa.value.answers[0];
           answerContent.value = qa.value.answers[0].content;
+          form.removeAttachment = false;
         } else {
           // 답변이 없는 경우 새 답변 작성 모드
           isEditMode.value = false;
@@ -489,14 +508,20 @@ export default {
       answerContent,
       currentAnswer,
       isEditMode,
+      previewUrl,
       imageViewer,
       answerTemplates,
       closeModal,
+      closeOnBackdrop,
+      isBackdropPress,
       applyAnswerTemplate,
       getLostContentParts,
+      downloadAttachment,
+      getAttachmentUrl,
+      isImageFile,
       openImageViewer,
       closeImageViewer,
-      handleFileChange,
+      handleFileSelect,
       submitAnswer,
       formatDate,
     };
