@@ -202,7 +202,22 @@
           <div v-html="formatContent(qa.answers?.[0]?.content)"></div>
         </div>
 
-        <!-- Answer Attachments -->
+        <div v-if="qa.answers?.[0]?.attachment_filename" class="mt-4 rounded-lg bg-gray-50 p-4">
+          <img
+            v-if="isImageFile(qa.answers[0].attachment_filename)"
+            :src="getAttachmentUrl(qa.answers[0].attachment, qa.answers[0].attachment_filename)"
+            :alt="qa.answers[0].attachment_filename"
+            class="max-h-80 max-w-full cursor-zoom-in rounded-lg object-contain"
+            @click="openImageViewer(getAttachmentUrl(qa.answers[0].attachment, qa.answers[0].attachment_filename), qa.answers[0].attachment_filename)"
+          />
+          <button
+            type="button"
+            class="text-primary-600 hover:underline"
+            @click="downloadFile(qa.answers[0].attachment, qa.answers[0].attachment_filename)"
+          >
+            첨부파일 다운로드: {{ qa.answers[0].attachment_filename }}
+          </button>
+        </div>
       </div>
 
       <!-- No Answer Yet -->
@@ -369,31 +384,7 @@
       </router-link>
     </div>
 
-    <div
-      v-if="imageViewer.show"
-      class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[60] p-4"
-      @click.self="closeImageViewer"
-    >
-      <button
-        type="button"
-        class="absolute top-4 right-4 text-white hover:text-gray-300"
-        @click="closeImageViewer"
-      >
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-      <div class="max-w-6xl max-h-[90vh]" @click.stop>
-        <img
-          :src="imageViewer.src"
-          :alt="imageViewer.alt"
-          class="max-w-full max-h-[85vh] object-contain"
-        />
-        <p v-if="imageViewer.alt" class="text-white text-center mt-3 text-sm">
-          {{ imageViewer.alt }}
-        </p>
-      </div>
-    </div>
+    <ImageViewer v-bind="imageViewer" @close="closeImageViewer" />
   </div>
 </template>
 
@@ -403,14 +394,17 @@ import { useRoute, useRouter } from "vue-router";
 import { useQAsStore } from "@/stores/qas";
 import { useAuthStore } from "@/stores/auth";
 import FileDropZone from "@/components/FileDropZone.vue";
+import ImageViewer from "@/components/ImageViewer.vue";
 import PasswordModal from "@/components/PasswordModal.vue";
 import api from "@/services/api";
 import { formatDate } from "@/utils/format";
+import { downloadAttachment, getAttachmentUrl, isImageFile } from "@/utils/attachment";
 
 export default {
   name: "QADetail",
   components: {
     FileDropZone,
+    ImageViewer,
     PasswordModal,
   },
   setup() {
@@ -536,19 +530,7 @@ export default {
       return "";
     };
 
-    const downloadFile = (fileData, fileName) => {
-      if (fileData && fileName) {
-        const blob = new Blob([fileData]);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-    };
+    const downloadFile = downloadAttachment;
 
     const openImageViewer = (src, alt = "") => {
       imageViewer.src = src;
@@ -753,6 +735,8 @@ export default {
       formatContent,
       getLostContentParts,
       getImageUrl,
+      getAttachmentUrl,
+      isImageFile,
       downloadFile,
       openImageViewer,
       closeImageViewer,
